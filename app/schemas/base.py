@@ -1,8 +1,16 @@
+
+# ==========================================
+# Imports
+# ==========================================
+
 from pydantic import BaseModel, EmailStr, Field, ConfigDict, ValidationError, model_validator
 from typing import Optional
 from uuid import UUID
 from datetime import datetime
 
+# ==========================================
+# Schemas
+# ==========================================
 
 class UserBase(BaseModel):
     """Base user schema with common fields"""
@@ -38,6 +46,9 @@ class PasswordMixin(BaseModel):
 class UserCreate(UserBase, PasswordMixin):
     """Schema for user creation"""
     pass
+
+class UserRead(UserBase):
+    """Schema for reading user data"""
 
 
 class UserLogin(PasswordMixin):

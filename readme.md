@@ -231,7 +231,6 @@ docker run -it --rm <image-name>
 
 # 🚀 6. Running the Project
 
-- **Without Docker**:
 
 ```bash
 python main.py
@@ -239,11 +238,34 @@ python main.py
 
 (or update this if the main script is different.)
 
-- **With Docker**:
 
 ```bash
 docker run -it --rm <image-name>
 ```
+
+
+# 🧪 Running Tests Locally
+
+This project uses [pytest](https://docs.pytest.org/) for testing. To run all tests locally:
+
+1. **Install dependencies** (if you haven't already):
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. **Run the test suite:**
+
+   ```bash
+   pytest
+   ```
+
+3. **View coverage report:**
+
+   ```bash
+   pytest --cov=app --cov-report=html
+   ```
+   Then open `htmlcov/index.html` in your browser to view detailed coverage results.
 
 ---
 
@@ -273,16 +295,6 @@ docker run -it --rm <image-name>
 
 # 🪞Reflection
 
-Docker can greatly enhance portability and scalability of a python application. Docker can package apps and their dependencies into isolated containers enabling your application to consistently run on different environments. This allows your app to basically run identically on your personal computer, servers, or cloud platforms like AWS, Azure, GCP etc.
 
-The other aspect that docker greatly enhances is scalability. Instead of running the full OS, docker shares the host OS kernel so multiple instances of the same python app can run at the same time. This leads to faster startup times and more efficient use of resources.
-
-A challenge I faced while Dockerizing my application was learning all the new commands that come with docker as well as just overall trying to understand the benefits of using it. I was running into issues where I couldn’t figure out how to properly create the qr_codes folder because it kept generating with the wrong name but then I found out that there are a bunch or common problems that windows users run into when using docker so that added some time in figuring this project out.
-
-Git facilitated the Dockerization process by providing a version control system. You can track your changes, revert changes, and collab with a team just like you would with any other application.
-
-Setting up GitHub actions for automated testing and docker builds contributes to maintaining code reliability by detecting issues early just like in other applications. This encourages us to write cleaner code and reduce the chances of encountering errors later on in production.
-
-I’m still a little shaky on all the new docker stuff. I played around with it back in the day over the summer when I was doing some online learning but never really dove deep into it or fully understood what its purpose was. I’m starting to grasp github actions a little bit better now but still need to get more confident in the docker environment like managing containers etc.
 
 ---
