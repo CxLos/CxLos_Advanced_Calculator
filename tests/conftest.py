@@ -1,5 +1,20 @@
 # tests/conftest.py
 
+"""
+Conftest files are used by pytest to define fixtures and setup/teardown logic that can be shared across multiple test files. This file includes:
+
+- Database setup and teardown logic to ensure a clean state for each test.
+- Helper functions for creating fake data.
+- Context managers for managing database sessions.
+- Server startup and healthcheck utilities.
+- Fixtures for providing a Playwright browser context and page for UI tests.
+- Command-line options for controlling test behavior (e.g., preserving the database, running slow tests
+"""
+
+# ========================================
+# Imports and Configuration
+# ========================================
+
 import subprocess
 import time
 import logging
@@ -22,6 +37,7 @@ from app.database_init import init_db, drop_db
 # ======================================================================================
 # Logging Configuration
 # ======================================================================================
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -31,6 +47,7 @@ logger = logging.getLogger(__name__)
 # ======================================================================================
 # Database Configuration
 # ======================================================================================
+
 fake = Faker()
 Faker.seed(12345)
 
@@ -43,6 +60,7 @@ TestingSessionLocal = get_sessionmaker(engine=test_engine)
 # ======================================================================================
 # Helper Functions
 # ======================================================================================
+
 def create_fake_user() -> Dict[str, str]:
     """
     Generate a dictionary of fake user data for testing.
@@ -58,7 +76,7 @@ def create_fake_user() -> Dict[str, str]:
         "password": fake.password(length=12)
     }
 
-@contextmanager
+@contextmanager # Context manager for managing database sessions in tests
 def managed_db_session():
     """
     Context manager for safe database session handling.
@@ -103,7 +121,13 @@ class ServerStartupError(Exception):
 # ======================================================================================
 # Primary Database Fixtures
 # ======================================================================================
-@pytest.fixture(scope="session", autouse=True)
+
+# use session-scoped setup to create the database schema once, and then a function-scoped fixture for providing sessions to tests. This allows us to control when the database is reset (either by dropping tables or truncating them) based on command-line options.
+
+@pytest.fixture(
+        scope="session", # Set up the database once per test session
+        autouse=True # Automatically use this fixture for all tests without needing to declare it explicitly
+)
 def setup_test_database(request):
     """
     Initialize the test database once per session:
@@ -126,7 +150,7 @@ def setup_test_database(request):
     init_db()
     logger.info("Initialized the test database with initial data.")
 
-    yield  # All tests run here
+    yield  # All tests run here 
 
     preserve_db = request.config.getoption("--preserve-db")
     if preserve_db:
@@ -163,7 +187,7 @@ def db_session(request) -> Generator[Session, None, None]:
 # ======================================================================================
 # Test Data Fixtures
 # ======================================================================================
-@pytest.fixture
+@pytest.fixture 
 def fake_user_data() -> Dict[str, str]:
     """Provide a dictionary of fake user data."""
     return create_fake_user()
@@ -174,7 +198,7 @@ def test_user(db_session: Session) -> User:
     Create and return a single test user.
     """
     user_data = create_fake_user()
-    user = User(**user_data)
+    user = User(**user_data) # **user_data unpacks the dictionary into keyword arguments for the User constructor
     db_session.add(user)
     db_session.commit()
     db_session.refresh(user)
@@ -194,7 +218,7 @@ def seed_users(db_session: Session, request) -> List[User]:
     try:
         num_users = request.param
     except AttributeError:
-        num_users = 5
+        num_users = 5 
 
     users = []
     for _ in range(num_users):

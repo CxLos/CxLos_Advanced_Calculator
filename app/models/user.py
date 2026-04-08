@@ -1,4 +1,13 @@
 # app/models/user.py
+
+"""
+User model with enhanced validation and security features.
+"""
+
+# ==========================================
+# Imports
+# ==========================================
+
 from datetime import datetime, timedelta
 import uuid
 from typing import Optional, Dict, Any
@@ -12,6 +21,10 @@ from pydantic import ValidationError
 from app.schemas.base import UserCreate
 from app.schemas.user import UserResponse, Token
 from app.database import Base
+
+# ==========================================
+# Imports
+# ==========================================
 
 class GUID(TypeDecorator):
     """Platform-independent GUID type. Uses CHAR(36) to store UUIDs as strings."""
