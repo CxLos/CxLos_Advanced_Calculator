@@ -289,7 +289,8 @@ This project uses [pytest](https://docs.pytest.org/) for testing. To run all tes
 
 ![Docker QR Image](./qr_codes/QRCode_20260311233610.png)
 
-##
+## Advanced Calculator Repo:
+![CxLos Advanced Calculator Repo](./qr_codes/cxlos_advanced_calculator_repo_qr.png)
 
 ---
 
