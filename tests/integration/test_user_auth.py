@@ -517,7 +517,8 @@ def test_error_handling():
             session.execute(text("INVALID SQL"))
     assert "INVALID SQL" in str(exc_info.value)
 
-
+def test_user_model_representation(test_user):
+    """Test the string representation of User model"""
     expected = f"<User(name={test_user.first_name} {test_user.last_name}, email={test_user.email})>"
     assert str(test_user) == expected
 

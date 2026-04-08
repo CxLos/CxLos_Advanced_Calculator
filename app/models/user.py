@@ -3,20 +3,30 @@ from datetime import datetime, timedelta
 import uuid
 from typing import Optional, Dict, Any
 
-from sqlalchemy import Column, String, DateTime, Boolean
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import Column, String, DateTime, Boolean, TypeDecorator, CHAR
 from sqlalchemy.exc import IntegrityError
-from passlib.context import CryptContext
+import bcrypt
 from jose import JWTError, jwt
 from pydantic import ValidationError
 
 from app.schemas.base import UserCreate
 from app.schemas.user import UserResponse, Token
+from app.database import Base
 
-Base = declarative_base()
+class GUID(TypeDecorator):
+    """Platform-independent GUID type. Uses CHAR(36) to store UUIDs as strings."""
+    impl = CHAR(36)
+    cache_ok = True
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    def process_bind_param(self, value, dialect):
+        if value is not None:
+            return str(value)
+        return value
+
+    def process_result_value(self, value, dialect):
+        if value is not None:
+            return uuid.UUID(value)
+        return value
 
 # Move to config
 SECRET_KEY = "your-secret-key"
@@ -26,7 +36,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 class User(Base):
     __tablename__ = 'users'
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
     email = Column(String(120), unique=True, nullable=False)
@@ -44,11 +54,15 @@ class User(Base):
     @staticmethod
     def hash_password(password: str) -> str:
         """Hash a password using bcrypt."""
-        return pwd_context.hash(password)
+        password_bytes = password.encode('utf-8')[:72]
+        return bcrypt.hashpw(password_bytes, bcrypt.gensalt()).decode('utf-8')
 
     def verify_password(self, plain_password: str) -> bool:
         """Verify a plain password against the hashed password."""
-        return pwd_context.verify(plain_password, self.password)
+        return bcrypt.checkpw(
+            plain_password.encode('utf-8')[:72],
+            self.password.encode('utf-8')
+        )
 
     @staticmethod
     def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -59,7 +73,7 @@ class User(Base):
         return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
     @staticmethod
-    def verify_token(token: str) -> Optional[UUID]:
+    def verify_token(token: str) -> Optional[uuid.UUID]:
         """Verify and decode a JWT token."""
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
