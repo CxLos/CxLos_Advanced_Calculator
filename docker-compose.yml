@@ -4,8 +4,8 @@
 # the FastAPI Calculator application. Docker Compose is a tool that allows you
 # to define and manage multi-container Docker applications using a YAML file.
 
-# Version Specification
-version: '3.8'  # Specify the version of Docker Compose syntax to use.
+# Version Specification -- Obsolete but still widely used, it indicates the version of the Docker Compose file format.
+# version: '3.8' # Not necessary
 
 # Services Definition
 services:
@@ -60,7 +60,7 @@ services:
   # Service: db (PostgreSQL)
   db:
     image: postgres:17  # Pinned to PostgreSQL 17 for compatibility with the data directory format.
-    container_name: postgres_db
+    container_name: calculator_postgres_db
     environment:
       POSTGRES_USER: postgres        # Default superuser name for the database.
       POSTGRES_PASSWORD: postgres    # Password for the superuser. In production, use secrets or env files.
