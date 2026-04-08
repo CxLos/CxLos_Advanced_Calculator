@@ -1,20 +1,3 @@
-# version: '3.8'
-
-# services:
-#   qr_code_app:
-#     build:
-#       context: .
-#       dockerfile: Dockerfile
-#     environment:
-#       - QR_CODE_DIR=/app/qr_codes
-#       - FILL_COLOR=orange
-#       - BACK_COLOR=blue
-#     volumes:
-#       - ./qr_codes:/app/qr_codes  # Maps the local 'qr_codes' directory to '/app/qr_codes' in the container
-#     # command: --url https://hub.docker.com/r/cxlos/cxlos_qr_code_maker 
-#     command: --url https://github.com/CxLos/CxLos_Docker_Assignment 
-# ============================================================================
-
 # docker-compose.yml
 
 # This Docker Compose file defines and configures the services required to run

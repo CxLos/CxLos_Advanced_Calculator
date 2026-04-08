@@ -27,11 +27,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 RUN chown -R appuser:appgroup /app
 
-# Install the Python packages specified in requirements.txt
-# RUN useradd -m myuser && pip install --no-cache-dir -r requirements.txt && \
-#     mkdir logs qr_codes && chown myuser:myuser logs qr_codes
-# Before copying the application code, create the logs and qr_codes directories
-# and ensure they are owned by the non-root user
+
 
 # Copy the rest of the application's source code into the container, setting ownership to 'myuser'
 # COPY --chown=myuser:myuser . .

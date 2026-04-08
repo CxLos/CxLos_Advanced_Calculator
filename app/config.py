@@ -1,10 +1,7 @@
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/fastapi_db"
-    QR_CODE_DIR: str = "qr_codes"
-    FILL_COLOR: str = "black"
-    BACK_COLOR: str = "white"
+    DATABASE_URL: str = "sqlite:///./test.db"
     
     class Config:
         env_file = ".env"
