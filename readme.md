@@ -27,9 +27,9 @@ Hello and Welcome to my docker practice repo! here is where you will see me lear
 
 # DockerHub Repo Preview
 
-**🌐 [View on Docker Hub](https://hub.docker.com/repository/docker/cxlos/cxlos_qr_code_maker/general)**
+**🌐 [View on Docker Hub](https://hub.docker.com/repository/docker/cxlos/cxlos_advanced_calculator/general)**
 
-![screenshot of docker hub repo](screenshots/module8_repo.png)
+![screenshot of docker hub repo](screenshots/module_10_img.png)
 
 ## Successfully Booted-up Docker Server
 
@@ -294,7 +294,7 @@ This project uses [pytest](https://docs.pytest.org/) for testing. To run all tes
 
 ---
 
-# 🪞Reflection
+# 🪞Reflection Week 10
 
 
 

@@ -14,3 +14,8 @@ if __name__ == "__main__":
     img = qr.make_image(fill_color="red", back_color="black")
     img.save(F"qr_codes/{OUTPUT_PATH}")
     print(f"QR code saved to {OUTPUT_PATH}")
+
+# Push to DockerHub:
+
+# docker build -t cxlos/cxlos_advanced_calculator:latest .
+# docker push cxlos/cxlos_advanced_calculator:latest
