@@ -1,0 +1,234 @@
+# ==============================================================================
+# WORKFLOW: CI/CD Pipeline
+# PURPOSE:  Automate testing, security scanning, and deployment on every push
+#           or pull request targeting the main branch.
+#
+# PSEUDOCODE (high level):
+#   DEFINE workflow named "CI/CD"
+#   TRIGGER workflow WHEN:
+#     - A commit is pushed to the 'main' branch
+#     - A pull request is opened/updated targeting the 'main' branch
+#
+#   PIPELINE STAGES (run in sequence):
+#     1. test     → Install dependencies and run all test suites
+#     2. security → Build Docker image and scan it for known vulnerabilities
+#     3. deploy   → Push the verified image to Docker Hub (only on main branch)
+# ==============================================================================
+
+name: CI/CD
+
+# ------------------------------------------------------------------------------
+# TRIGGER CONDITIONS
+# Run this pipeline when:
+#   - Code is pushed directly to 'main'
+#   - A pull request targets 'main' (allows catching issues before merge)
+# ------------------------------------------------------------------------------
+on:
+ push:
+   branches: [ main ]
+ pull_request:
+   branches: [ main ]
+
+jobs:
+
+ # ============================================================================
+ # JOB 1: test
+ # PURPOSE: Validate application correctness by running all test suites.
+ #
+ # PSEUDOCODE:
+ #   PROVISION a fresh Ubuntu runner
+ #
+ #   STEP 1 — Checkout source code:
+ #     Clone the repository into the runner's working directory so subsequent
+ #     steps have access to all project files.
+ #
+ #   STEP 2 — Set up Python 3.10:
+ #     Install the specified Python version on the runner to ensure a
+ #     consistent, reproducible environment across all pipeline runs.
+ #
+ #   STEP 3 — Restore dependency cache:
+ #     CHECK IF a cached copy of the virtual environment and pip packages
+ #     already exists (keyed by OS + hash of requirements.txt):
+ #       IF cache HIT  → restore cached packages (skip re-downloading)
+ #       IF cache MISS → proceed to install from scratch (cache will be saved
+ #                        after the Install dependencies step)
+ #
+ #   STEP 4 — Install dependencies:
+ #     CREATE a Python virtual environment in ./venv
+ #     ACTIVATE the virtual environment
+ #     INSTALL all packages listed in requirements.txt via pip
+ #     INSTALL Playwright browser binaries required for end-to-end tests
+ #
+ #   STEP 5 — Run tests:
+ #     ACTIVATE the virtual environment
+ #     RUN unit tests under tests/unit/ with code coverage reporting
+ #       → Generate a JUnit XML report for CI result tracking
+ #     RUN integration tests under tests/integration/
+ #     RUN end-to-end (e2e) tests under tests/e2e/ using Playwright
+ #
+ #   IF any test step fails → mark the job as FAILED and stop the pipeline
+ # ============================================================================
+ test:
+   runs-on: ubuntu-latest
+   steps:
+
+     # STEP 1: Clone the repository into the runner's workspace
+     - uses: actions/checkout@v4
+
+     # STEP 2: Install Python 3.10 — ensures a consistent interpreter version
+     - uses: actions/setup-python@v6
+       with:
+         python-version: '3.10'
+
+     # STEP 3: Attempt to restore a previously saved pip/venv cache.
+     #   Cache key is derived from the OS name and a hash of requirements.txt.
+     #   If requirements.txt changes, a new cache is created automatically.
+     - uses: actions/cache@v4
+       with:
+         path: |
+           venv
+           ~/.cache/pip
+         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+         restore-keys: |
+           ${{ runner.os }}-pip-
+
+     # STEP 4: Create virtual environment, activate it, install all Python
+     #   dependencies, and download Playwright browser binaries.
+     - name: Install dependencies
+       run: |
+         python -m venv venv
+         source venv/bin/activate
+         pip install -r requirements.txt
+         playwright install
+
+     # STEP 5: Execute all three test layers in order:
+     #   - Unit tests   : fast, isolated, no external dependencies
+     #   - Integration  : test interaction between internal components
+     #   - E2E tests    : simulate real user flows in a browser via Playwright
+     - name: Run tests
+       run: |
+         source venv/bin/activate
+         pytest tests/unit/ --cov=main --cov=app --junitxml=test-results/junit.xml
+         pytest tests/integration/ --no-cov --override-ini="addopts="
+         pytest tests/e2e/ --no-cov --override-ini="addopts=" || [ $? -eq 5 ]
+
+ # ============================================================================
+ # JOB 2: security
+ # PURPOSE: Scan the Docker image for known CVEs before it can be deployed.
+ #          This job only starts AFTER 'test' completes successfully.
+ #
+ # PSEUDOCODE:
+ #   WAIT FOR job 'test' to succeed
+ #   PROVISION a fresh Ubuntu runner
+ #
+ #   STEP 1 — Checkout source code:
+ #     Re-clone the repository so the Dockerfile is available for building.
+ #
+ #   STEP 2 — Build Docker image:
+ #     BUILD a Docker image from the project's Dockerfile
+ #     TAG the image locally as 'app:test' (temporary, not pushed yet)
+ #
+ #   STEP 3 — Trivy vulnerability scan:
+ #     SCAN the 'app:test' image using Trivy vulnerability scanner
+ #     OUTPUT results in a human-readable table format
+ #     IF any CRITICAL or HIGH severity unfixed vulnerabilities are found:
+ #       EXIT with code 1 → mark job as FAILED and block deployment
+ #     SKIP vulnerabilities that have no available fix (ignore-unfixed: true)
+ #
+ #   IF the scan fails → the deploy job is blocked and will not run
+ # ============================================================================
+ security:
+   needs: test
+   runs-on: ubuntu-latest
+   steps:
+
+     # STEP 1: Clone the repository to access the Dockerfile
+     - uses: actions/checkout@v4
+
+     # STEP 2: Build the Docker image locally using the project Dockerfile.
+     #   Tagged as 'app:test' for identification during scanning.
+     - name: Build image
+       run: docker build --no-cache -t app:test .
+
+     # STEP 3: Run Trivy to scan the built image for security vulnerabilities.
+     #   Fails the pipeline (exit-code: 1) if CRITICAL or HIGH CVEs are found
+     #   that have a known fix available, preventing insecure images from
+     #   reaching production.
+     - name: Run Trivy vulnerability scanner
+       uses: aquasecurity/trivy-action@master
+       with:
+         image-ref: 'app:test'
+         format: 'table'
+         exit-code: '1'
+         ignore-unfixed: true
+         severity: 'CRITICAL,HIGH'
+
+ # ============================================================================
+ # JOB 3: deploy
+ # PURPOSE: Build a multi-platform Docker image and push it to Docker Hub.
+ #          Only runs when both 'test' and 'security' pass, AND only on the
+ #          main branch (not on pull request branches).
+ #
+ # PSEUDOCODE:
+ #   WAIT FOR job 'security' to succeed
+ #   IF the current Git ref is NOT 'refs/heads/main' → SKIP this job entirely
+ #   PROVISION a fresh Ubuntu runner in the 'production' environment
+ #
+ #   STEP 1 — Checkout source code:
+ #     Clone the repository to access the Dockerfile for the final build.
+ #
+ #   STEP 2 — Set up Docker Buildx:
+ #     Initialize Docker Buildx, which enables building images for multiple
+ #     CPU architectures (amd64 and arm64) in a single build command.
+ #
+ #   STEP 3 — Authenticate with Docker Hub:
+ #     LOG IN to Docker Hub using credentials stored as GitHub Secrets:
+ #       DOCKERHUB_USERNAME → Docker Hub account name
+ #       DOCKERHUB_TOKEN    → Docker Hub access token (never stored in code)
+ #
+ #   STEP 4 — Build and push multi-platform image:
+ #     BUILD the Docker image for both linux/amd64 and linux/arm64 platforms
+ #     TAG the image with two labels:
+ #       - 'latest'         → always points to the most recent main build
+ #       - '<commit SHA>'   → immutable tag for this exact commit (traceability)
+ #     PUSH both tags to Docker Hub
+ #     USE registry cache to speed up future builds:
+ #       - Pull existing cache layers from Docker Hub before building
+ #       - Write new cache layers inline into the pushed image manifest
+ # ============================================================================
+ deploy:
+   needs: security
+   if: github.ref == 'refs/heads/main'
+   runs-on: ubuntu-latest
+   environment: production 
+   steps:
+
+     # STEP 1: Clone the repository to get the Dockerfile for the final build
+     - uses: actions/checkout@v4
+
+     # STEP 2: Set up Docker Buildx to support multi-architecture image builds
+     #   (linux/amd64 for standard servers, linux/arm64 for Apple Silicon / ARM)
+     - uses: docker/setup-buildx-action@v3
+
+     # STEP 3: Authenticate with Docker Hub using repository secrets.
+     #   Secrets are injected at runtime and never exposed in logs.
+     - uses: docker/login-action@v3
+       with:
+         username: ${{ secrets.DOCKERHUB_USERNAME }}
+         password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+     # STEP 4: Build the final production image for both platforms and push to
+     #   Docker Hub. Two tags are applied:
+     #     - :latest    → convenient reference for the current stable image
+     #     - :<SHA>     → pinnable, auditable reference tied to this exact commit
+     #   Registry-based layer caching reduces redundant work on repeated builds.
+     - uses: docker/build-push-action@v5
+       with:
+         push: true
+         tags: |
+           cxlos/601_module8:latest
+           cxlos/601_module8:${{ github.sha }}
+         platforms: linux/amd64,linux/arm64
+         cache-from: type=registry,ref=cxlos/601_module8:cache
+         cache-to: type=inline,mode=max
+# ============================================================================
