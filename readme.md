@@ -296,6 +296,8 @@ This project uses [pytest](https://docs.pytest.org/) for testing. To run all tes
 
 # 🪞Reflection Week 10
 
+Some new insights I gained from hashing passwords and validating user input was the importance of it and the purpose it serves. I learned that you should never store plain text user passwords as a core part of protecting user information. Using hashing libraries like bcrypt ensure that if a database is compromised, the original password remains protected. Another thing I learned was utilizing pydantic for input validation. I saw how it enforces data types and constraints automatically, making code cleaner and also helping prevent common invalid user input issues.
 
+I did face a few challenges along the way in this module. It was a little confusing at first seeing how all the new files and schemas and databases all connect. With learning these new concepts, the hardest challenge I seem to face in every module is how am I going to create new tests around this?
 
 ---
