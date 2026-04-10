@@ -25,7 +25,7 @@ from app.schemas.user import UserResponse, Token
 from app.database import Base
 
 # ==========================================
-# Imports
+# User Model
 # ==========================================
 
 class GUID(TypeDecorator):

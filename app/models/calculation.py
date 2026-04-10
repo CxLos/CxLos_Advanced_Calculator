@@ -1,4 +1,6 @@
+
 # app/models/calculation.py
+
 """
 Calculation Models with Polymorphic Inheritance
 
@@ -21,14 +23,22 @@ This design pattern allows for:
 4. Easy extensibility: Add new calculation types by creating new subclasses
 """
 
+# ==========================================
+# Imports
+# ==========================================
+
+import math
 from datetime import datetime
-import uuid
 from typing import List
 from sqlalchemy import Column, String, DateTime, ForeignKey, JSON, Float
+import uuid
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship, declared_attr
 from app.database import Base
 
+# ==========================================
+# Calculation Models
+# ==========================================
 
 class AbstractCalculation:
     """
@@ -68,7 +78,10 @@ class AbstractCalculation:
         """
         return Column(
             UUID(as_uuid=True),
-            ForeignKey('users.id', ondelete='CASCADE'),
+            ForeignKey(
+                'users.id', 
+                ondelete='CASCADE' # Ensures calculations are deleted when user is deleted
+            ),
             nullable=False,
             index=True
         )
@@ -88,7 +101,7 @@ class AbstractCalculation:
             index=True
         )
 
-    @declared_attr
+    @declared_attr 
     def inputs(cls):
         """
         JSON column storing the list of numbers for the calculation.
@@ -120,7 +133,7 @@ class AbstractCalculation:
         """Timestamp when the calculation was created"""
         return Column(
             DateTime,
-            default=datetime.utcnow,
+            default=datetime.now,
             nullable=False
         )
 
@@ -129,8 +142,8 @@ class AbstractCalculation:
         """Timestamp when the calculation was last updated"""
         return Column(
             DateTime,
-            default=datetime.utcnow,
-            onupdate=datetime.utcnow,
+            default=datetime.now,
+            onupdate=datetime.now,
             nullable=False
         )
 
@@ -180,6 +193,10 @@ class AbstractCalculation:
             'subtraction': Subtraction,
             'multiplication': Multiplication,
             'division': Division,
+            'power': Power,
+            'square_root': Sqrt,
+            'modulus': Modulus,
+            'floor': Floor,
         }
         calculation_class = calculation_classes.get(calculation_type.lower())
         if not calculation_class:
@@ -240,7 +257,7 @@ class Addition(Calculation):
         add = Addition(user_id=user_id, inputs=[1, 2, 3])
         result = add.get_result()  # Returns 6
     """
-    __mapper_args__ = {"polymorphic_identity": "addition"}
+    __mapper_args__ = {"polymorphic_identity": "addition"} # Specifies the discriminator value for this subclass aka in simpler terms it tells SQLAlchemy that when it sees 'addition' in the 'type' column, it should instantiate this class
 
     def get_result(self) -> float:
         """
@@ -345,7 +362,7 @@ class Division(Calculation):
     Note: This implementation uses EAFP (Easier to Ask for Forgiveness than
     Permission) by checking for zero during calculation rather than before.
     """
-    __mapper_args__ = {"polymorphic_identity": "division"}
+    __mapper_args__ = {"polymorphic_identity" : "division"}
 
     def get_result(self) -> float:
         """
@@ -369,4 +386,103 @@ class Division(Calculation):
             if value == 0:
                 raise ValueError("Cannot divide by zero.")
             result /= value
+        return result
+    
+class Power(Calculation):
+    """
+    Power Calculation subclass
+
+    Polymorphic Identity: 'power'
+    Operation: Multiplies the first number to the power of the second number
+
+    Example:
+      pwr = Power(user_id=user_id, inputs=[10, 2])
+      result = pwr.get_result() # returns 100 (10 ** 2)
+    """
+
+    __mapper_args__ = {"polymorphic_identity" : "power"}
+
+    def get_result(self) -> float:  
+
+      if not isinstance(self.inputs, list):
+          raise ValueError("Inputs must be a list of numbers")
+      if len(self.inputs) < 2:
+          raise ValueError("Inputs must be a list of at least 2 numbers")
+      
+      result = self.inputs[0] ** self.inputs[1]
+      return result
+    
+class Sqrt(Calculation):
+    """
+    Square Root Calculation subclass
+
+    Polymorphic Identity: 'sqrt'
+    Operation: Finds the square root of the entered number
+
+    Example:
+      sqrt = Sqrt(user_id=user_id, inputs = [9])
+      result = sqrt.get_result() # returns 3
+    """
+
+    __mapper_args__ = {"polymorphic_identity" : "sqrt"}
+
+    def get_result(self) -> float:
+        
+        if not isinstance(self.inputs, list):
+            raise ValueError("Inputs must be a list of numbers")
+        if len(self.inputs) < 1:
+            raise ValueError("Inputs must be a list of at least 1 number")
+        if self.inputs[0] < 0:
+            raise ValueError("Cannot calculate the square root of a negative number")
+        result = self.inputs[0] ** 0.5
+        return result
+    
+class Floor(Calculation):
+    """
+    Floor Division Calculation subclass
+
+    Polymorphic Identity: 'floor'
+    Operation: Divides the first number by the second and returns the whole number (floor division)
+
+    Example:
+      floor = Floor(user_id=user_id, inputs = [10, 3])
+      result = floor.get_result() # returns 3 (10 // 3)
+    """
+
+    __mapper_args__ = {"polymorphic_identity" : "floor"}
+
+    def get_result(self) -> float:
+        
+        if not isinstance(self.inputs, list):
+            raise ValueError("Inputs must be a list of numbers")
+        if len(self.inputs) < 2:
+            raise ValueError("Inputs must be a list of at least 2 numbers")
+        if self.inputs[1] == 0:
+            raise ValueError("Cannot divide by zero.")
+        result = self.inputs[0] // self.inputs[1]
+        return result
+    
+class Modulus(Calculation):
+    """
+    Modulus Calculation subclass
+
+    Polymorphic Identity: 'modulus'
+    Operation: Finds the remainder when the first number is divided by the second number
+
+    Example:
+      mod = Modulus(user_id=user_id, inputs = [10, 3])
+      result = mod.get_result() # returns 1
+    """
+
+    __mapper_args__ = {"polymorphic_identity" : "modulus"}
+
+    def get_result(self) -> float:
+        
+        if not isinstance(self.inputs, list):
+            raise ValueError("Inputs must be a list of numbers")
+        if len(self.inputs) < 2:
+            raise ValueError("Inputs must be a list of at least 2 numbers")
+        if self.inputs[1] == 0:
+            raise ValueError("Cannot divide by zero")
+        result = self.inputs[0] % self.inputs[1]
         return result
