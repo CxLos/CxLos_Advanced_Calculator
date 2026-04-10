@@ -301,3 +301,9 @@ Some new insights I gained from hashing passwords and validating user input was 
 I did face a few challenges along the way in this module. It was a little confusing at first seeing how all the new files and schemas and databases all connect. With learning these new concepts, the hardest challenge I seem to face in every module is how am I going to create new tests around this?
 
 ---
+
+# 🪞Reflection Week 11
+
+
+
+---
