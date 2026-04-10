@@ -27,6 +27,7 @@ This design pattern allows for:
 # Imports
 # ==========================================
 
+from abc import abstractmethod
 import math
 from datetime import datetime
 from typing import List
@@ -205,6 +206,7 @@ class AbstractCalculation:
             )
         return calculation_class(user_id=user_id, inputs=inputs)
 
+    @abstractmethod
     def get_result(self) -> float:
         """
         Abstract method to compute the calculation result.
@@ -219,7 +221,7 @@ class AbstractCalculation:
         raise NotImplementedError(
             "Subclasses must implement get_result() method"
         )
-
+  
     def __repr__(self):
         return f"<Calculation(type={self.type}, inputs={self.inputs})>"
 
