@@ -8,7 +8,7 @@ Application configuration settings.
 # Imports
 # ==============================================
 
-from functools import lru_cache
+from functools import lru_cache 
 from pydantic_settings import BaseSettings
 from typing import Optional, List
 
@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     from environment variables or a .env file. This follows the Twelve-Factor App
     methodology for configuration management.
     """
+    
     DATABASE_URL: str = "postgresql://postgres:postgres@db:5432/calculator_db"
     
     # JWT Settings
