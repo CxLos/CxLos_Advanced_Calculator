@@ -1,4 +1,13 @@
+
 # tests/auth/test_dependencies.py
+
+"""
+Integration tests for authentication dependencies.
+"""
+
+# ==============================================
+# Imports
+# ==============================================
 
 import pytest
 from unittest.mock import MagicMock, patch, ANY
@@ -9,6 +18,10 @@ from app.models.user import User
 from uuid import uuid4
 from datetime import datetime
 
+# ==============================================
+# Test Data and Fixtures
+# =============================================
+
 # Sample user data for testing
 sample_user = User(
     id=uuid4(),
@@ -18,8 +31,8 @@ sample_user = User(
     last_name="User",
     is_active=True,
     is_verified=True,
-    created_at=datetime.utcnow(),
-    updated_at=datetime.utcnow()
+    created_at=datetime.now(),
+    updated_at=datetime.now()
 )
 
 inactive_user = User(
@@ -30,8 +43,8 @@ inactive_user = User(
     last_name="User",
     is_active=False,
     is_verified=False,
-    created_at=datetime.utcnow(),
-    updated_at=datetime.utcnow()
+    created_at=datetime.now(),
+    updated_at=datetime.now()
 )
 
 # Fixture for mocking the database session
@@ -44,6 +57,10 @@ def mock_db():
 def mock_verify_token():
     with patch.object(User, 'verify_token') as mock:
         yield mock
+
+# =============================================
+# Test Cases
+# =============================================
 
 # Test get_current_user with valid token and existing user
 def test_get_current_user_valid_token_existing_user(mock_db, mock_verify_token):

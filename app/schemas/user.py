@@ -5,87 +5,8 @@
 
 from datetime import datetime
 from typing import Optional
-from datetime import datetime
-# --------------------------------
-import uuid
 from uuid import UUID
-from sqlalchemy.dialects.postgresql import UUID
-# --------------------------------
 from pydantic import BaseModel, EmailStr, ConfigDict
-from sqlalchemy import Column, String, DateTime
-from sqlalchemy.orm import relationship
-# --------------------------------
-from app.database import Base
-
-# ==================================
-# User Schema and Model
-# ==================================
-
-class User(Base):
-    """
-    User model representing a user in the system.
-    
-    A user can create and own multiple calculations. This model uses UUID
-    for the primary key to ensure uniqueness across distributed systems.
-    
-    Attributes:
-        id: Unique identifier for the user (UUID)
-        username: Unique username for the user
-        email: User's email address
-        created_at: Timestamp when the user was created
-        updated_at: Timestamp when the user was last updated
-        calculations: Relationship to all calculations owned by this user
-    """
-
-    __tablename__ = 'users'
-
-    id = Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-        nullable=False
-    )
-
-    username = Column(
-        String(50),
-        unique=True,
-        nullable=False,
-        index=True
-    )
-
-    email = Column(
-        String(100),
-        unique=True,
-        nullable=False,
-        index=True
-    )
-
-    created_at = Column(
-        DateTime,
-        default=datetime.now,
-        nullable=False
-    )
-
-    updated_at = Column(
-        DateTime,
-        default=datetime.now,
-        onupdate=datetime.now,
-        nullable=False
-    )
-
-    # Relationship to calculations
-    # back_populates creates a bidirectional relationship
-    # cascade="all, delete-orphan" ensures calculations are deleted
-    # when user is deleted
-    
-    calculations = relationship(
-        "Calculation", # This string references the Calculation model 
-        back_populates="user", # This should match the 'user' relationship in the Calculation model
-        cascade="all, delete-orphan" # Ensures that when a user is deleted, all their calculations are also deleted
-    )
-
-    def __repr__(self):
-        return f"<User(username={self.username}, email={self.email})>"
 
 # ==================================
 # Authentication Schemas
