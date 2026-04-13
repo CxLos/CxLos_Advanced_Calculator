@@ -1,3 +1,4 @@
+
 """
 This module defines a mixin class for SQLAlchemy models, providing common fields and functionality."""
 

@@ -2,7 +2,8 @@
 # tests/unit/test_calculation_schema_validation.py
 
 """
-Unit tests for validating the Calculation schemas."""
+Unit tests for validating the Calculation schemas.
+"""
 
 # ==============================================
 # Imports
