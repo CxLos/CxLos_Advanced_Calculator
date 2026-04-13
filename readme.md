@@ -1,4 +1,4 @@
-# 🐋 CxLos Advanced Calculator Project
+# 🧮 CxLos Advanced Calculator Project
 ---
 
 ## Project Description
