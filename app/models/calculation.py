@@ -28,26 +28,28 @@ This design pattern allows for:
 # ==========================================
 
 from abc import abstractmethod
-import math
-from datetime import datetime
 from typing import List
-from sqlalchemy import Column, String, DateTime, ForeignKey, JSON, Float
+from sqlalchemy import Column, String, ForeignKey, JSON, Float
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship, declared_attr
 from app.database import Base
+from app.models.mixin import TimestampMixin, UUIDMixin
 
 # ==========================================
 # Calculation Models
 # ==========================================
 
-class AbstractCalculation:
+class AbstractCalculation(UUIDMixin, TimestampMixin):
     """
     Abstract base class defining common attributes for all calculations.
     
     This class uses SQLAlchemy's @declared_attr decorator to define columns
     that will be shared across all calculation types. The @declared_attr
     decorator is necessary when defining columns in a mixin class.
+    
+    Inherits from UUIDMixin (id) and TimestampMixin (created_at, updated_at)
+    to avoid duplicating those common fields.
     
     Design Pattern: This follows the Template Method pattern, where the
     abstract class defines the structure and subclasses provide specific
@@ -58,16 +60,6 @@ class AbstractCalculation:
     def __tablename__(cls):
         """All calculation types share the 'calculations' table"""
         return 'calculations'
-
-    @declared_attr
-    def id(cls):
-        """Unique identifier for each calculation (UUID for distribution)"""
-        return Column(
-            UUID(as_uuid=True),
-            primary_key=True,
-            default=uuid.uuid4,
-            nullable=False
-        )
 
     @declared_attr
     def user_id(cls):
@@ -127,25 +119,6 @@ class AbstractCalculation:
         return Column(
             Float,
             nullable=True
-        )
-
-    @declared_attr
-    def created_at(cls):
-        """Timestamp when the calculation was created"""
-        return Column(
-            DateTime,
-            default=datetime.now,
-            nullable=False
-        )
-
-    @declared_attr
-    def updated_at(cls):
-        """Timestamp when the calculation was last updated"""
-        return Column(
-            DateTime,
-            default=datetime.now,
-            onupdate=datetime.now,
-            nullable=False
         )
 
     @declared_attr

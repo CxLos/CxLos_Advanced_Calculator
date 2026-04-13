@@ -1,4 +1,6 @@
+
 # app/schemas/calculation.py
+
 """
 Calculation Pydantic Schemas
 
@@ -47,6 +49,10 @@ class CalculationType(str, Enum):
     SUBTRACTION = "subtraction"
     MULTIPLICATION = "multiplication"
     DIVISION = "division"
+    POWER = "power"
+    SQRT = "square_root"
+    MODULUS = "modulus"
+    FLOOR = "floor"
 
 
 class CalculationBase(BaseModel):
@@ -71,7 +77,7 @@ class CalculationBase(BaseModel):
         min_length=2
     )
 
-    @field_validator("type", mode="before")
+    @field_validator("type", mode="before") # This runs before Pydantic's standard validation
     @classmethod
     def validate_type(cls, v):
         """
@@ -230,7 +236,7 @@ class CalculationUpdate(BaseModel):
     )
 
 
-class CalculationResponse(CalculationBase):
+class CalculationRead(CalculationBase):
     """
     Schema for reading a Calculation from the database.
     
@@ -241,8 +247,9 @@ class CalculationResponse(CalculationBase):
     The from_attributes=True config allows this schema to be populated from
     SQLAlchemy model instances using model.from_orm(db_calculation).
     """
+
     id: UUID = Field(
-        ...,
+        ..., # This means the field is required (cannot be None)
         description="Unique UUID of the calculation",
         examples=["123e4567-e89b-12d3-a456-426614174999"]
     )

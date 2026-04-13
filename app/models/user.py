@@ -6,15 +6,12 @@ This module defines the User model which represents users in the system.
 Each user can have multiple calculations associated with them.
 """
 
-from datetime import datetime
-import uuid
-from sqlalchemy import Column, String, DateTime
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 from app.database import Base
+from app.models.mixin import TimestampMixin, UUIDMixin
 
-
-class User(Base):
+class User(UUIDMixin, TimestampMixin, Base):
     """
     User model representing a user in the system.
     
@@ -31,13 +28,6 @@ class User(Base):
     """
     __tablename__ = 'users'
 
-    id = Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-        nullable=False
-    )
-
     username = Column(
         String(50),
         unique=True,
@@ -50,19 +40,6 @@ class User(Base):
         unique=True,
         nullable=False,
         index=True
-    )
-
-    created_at = Column(
-        DateTime,
-        default=datetime.utcnow,
-        nullable=False
-    )
-
-    updated_at = Column(
-        DateTime,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
-        nullable=False
     )
 
     # Relationship to calculations
