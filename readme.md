@@ -1,4 +1,4 @@
-# 🐋 CxLos Docker Calculator Assignment
+# 🐋 CxLos Advanced Calculator Project
 ---
 
 ## Project Description
