@@ -1,5 +1,12 @@
 # app/auth/dependencies.py
 
+"""
+Authentication Dependencies
+
+This module defines dependencies for authentication and user retrieval in FastAPI.
+These dependencies can be used in route handlers to enforce authentication and retrieve the current user based on a JWT token.
+"""
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from app.models.user import User
