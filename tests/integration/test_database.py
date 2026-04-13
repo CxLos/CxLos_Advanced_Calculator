@@ -1,3 +1,14 @@
+
+# tests/unit/test_database.py
+
+"""
+Unit tests for Database
+"""
+
+# ==============================================
+# Imports
+# ==============================================
+
 import pytest
 from unittest.mock import patch, MagicMock
 from sqlalchemy.exc import SQLAlchemyError
@@ -6,6 +17,29 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm.session import Session
 import importlib
 import sys
+
+from app.database import get_db
+
+# ==============================================
+# Test Getting DB Session
+# ==============================================
+
+def test_get_db_starts_session():
+    """
+    Test that db actually starts session & closes it
+    """
+
+    gen = get_db()
+    session = next(gen)
+    assert session is not None
+    try:
+        next(gen)
+    except StopIteration:
+        pass
+
+# ==============================================
+# Test Cases
+# ==============================================
 
 DATABASE_MODULE = "app.database"
 

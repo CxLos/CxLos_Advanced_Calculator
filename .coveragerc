@@ -1,0 +1,13 @@
+[run]
+omit =
+    app/auth/redis.py
+    app/auth/jwt.py
+    app/schemas/token.py
+    app/models/user_1.py
+    tests/*
+    */__pycache__/*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    if __name__ == .__main__.

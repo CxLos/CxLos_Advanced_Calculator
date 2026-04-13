@@ -9,6 +9,10 @@ Unit tests for configuration settings.
 
 from app.core.config import Settings, get_settings
 
+# ==============================================
+# Test Cases
+# =============================================
+
 def test_get_settings():
   """
   Verify the get settings function works
