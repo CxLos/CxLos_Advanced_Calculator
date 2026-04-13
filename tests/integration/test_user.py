@@ -211,8 +211,11 @@ def test_update_with_refresh(db_session, test_user):
     """
     Update a user's email and refresh the session to see updated fields.
     """
+    import time
     original_email = test_user.email
     original_update_time = test_user.updated_at
+    
+    time.sleep(1)  # Ensure timestamp difference (SQLite has 1-second precision)
     
     new_email = f"new_{original_email}"
     test_user.email = new_email

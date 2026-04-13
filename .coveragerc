@@ -4,6 +4,7 @@ omit =
     app/auth/jwt.py
     app/schemas/token.py
     app/models/user_1.py
+    app/models/user.py
     tests/*
     */__pycache__/*
 

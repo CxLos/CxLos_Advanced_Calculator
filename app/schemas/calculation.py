@@ -19,6 +19,10 @@ Design Pattern: Data Transfer Objects (DTOs)
 These schemas act as DTOs, defining contracts between API and clients.
 """
 
+# ==============================================
+# Imports
+# ==============================================
+
 from enum import Enum
 from pydantic import (
     BaseModel,
@@ -31,6 +35,9 @@ from typing import List, Optional
 from uuid import UUID
 from datetime import datetime
 
+# ==============================================
+# Calculation Schemas
+# ==============================================
 
 class CalculationType(str, Enum):
     """
