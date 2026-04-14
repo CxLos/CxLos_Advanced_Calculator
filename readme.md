@@ -294,16 +294,26 @@ This project uses [pytest](https://docs.pytest.org/) for testing. To run all tes
 
 ---
 
-# 🪞Reflection Week 10
+# 🪞Reflections 
+
+## Week 10
 
 Some new insights I gained from hashing passwords and validating user input was the importance of it and the purpose it serves. I learned that you should never store plain text user passwords as a core part of protecting user information. Using hashing libraries like bcrypt ensure that if a database is compromised, the original password remains protected. Another thing I learned was utilizing pydantic for input validation. I saw how it enforces data types and constraints automatically, making code cleaner and also helping prevent common invalid user input issues.
 
 I did face a few challenges along the way in this module. It was a little confusing at first seeing how all the new files and schemas and databases all connect. With learning these new concepts, the hardest challenge I seem to face in every module is how am I going to create new tests around this?
 
----
+## Week 11
 
-# 🪞Reflection Week 11
+Creating & validating the calculation model expanded my expertise in Databases and Pydantic by seeing how everything works together in the backend. We went from simply defining fields to incorporating validation rules, type checking, and constraints to enforce logic at the model level before data reaches the database. All of this reduces bugs and improves maintainability.
 
+Unit/Integration testing, Docker, and security all play an important role in this application despite there being no routes yet because we still need to get the hang of what we are learning when there eventually are routes. Writing tests early helps verify that the calculation logic is behaving as intended and that future changes are less likely to introduce problems. Docker CI kind of forces us to take into consideration environment consistency and how code will behave outside of my local machine. Security considerations like proper validation, I believe, are easier to handle at this stage before things grow too complex.
 
+My prior python experience in the simpler calculator app helped prepare me for more complex code utilizing polymorphic logic and factory patterns because it slowly warmed us up for what we are working with now. Rather than hard-coding logic for each calculation type, the factory allows us to create more flexible code based on model input.
+
+Some hurdles I encountered were understanding how the factory pattern does what it does and how to correctly configure the test environment. I overcame these by reading the notes in the repository and getting more hands-on practice doing the homework.
+
+## Week 12
+
+- 
 
 ---
