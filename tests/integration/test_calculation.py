@@ -362,3 +362,55 @@ def test_calculation_repr():
     calc = Addition(user_id=user_id, inputs=[1, 2])
     assert "type=" in repr(calc)
     assert "inputs=" in repr(calc)
+
+# ==============================================
+# Error Handling - Invalid Inputs (not a list) for each subclass
+# ==============================================
+
+def test_subtraction_invalid_inputs_not_list():
+    """Test that non-list inputs raise ValueError for Subtraction."""
+    calc = Subtraction(user_id=user_id, inputs="not a list")
+    with pytest.raises(ValueError, match="Inputs must be a list"):
+        calc.get_result()
+
+def test_multiplication_invalid_inputs_not_list():
+    """Test that non-list inputs raise ValueError for Multiplication."""
+    calc = Multiplication(user_id=user_id, inputs="not a list")
+    with pytest.raises(ValueError, match="Inputs must be a list"):
+        calc.get_result()
+
+def test_division_invalid_inputs_not_list():
+    """Test that non-list inputs raise ValueError for Division."""
+    calc = Division(user_id=user_id, inputs="not a list")
+    with pytest.raises(ValueError, match="Inputs must be a list"):
+        calc.get_result()
+
+def test_power_invalid_inputs_not_list():
+    """Test that non-list inputs raise ValueError for Power."""
+    calc = Power(user_id=user_id, inputs="not a list")
+    with pytest.raises(ValueError, match="Inputs must be a list"):
+        calc.get_result()
+
+def test_sqrt_invalid_inputs_not_list():
+    """Test that non-list inputs raise ValueError for Sqrt."""
+    calc = Sqrt(user_id=user_id, inputs="not a list")
+    with pytest.raises(ValueError, match="Inputs must be a list"):
+        calc.get_result()
+
+def test_sqrt_empty_inputs():
+    """Test that empty inputs raise ValueError for Sqrt."""
+    calc = Sqrt(user_id=user_id, inputs=[])
+    with pytest.raises(ValueError, match="at least 1"):
+        calc.get_result()
+
+def test_floor_invalid_inputs_not_list():
+    """Test that non-list inputs raise ValueError for Floor."""
+    calc = Floor(user_id=user_id, inputs="not a list")
+    with pytest.raises(ValueError, match="Inputs must be a list"):
+        calc.get_result()
+
+def test_modulus_invalid_inputs_not_list():
+    """Test that non-list inputs raise ValueError for Modulus."""
+    calc = Modulus(user_id=user_id, inputs="not a list")
+    with pytest.raises(ValueError, match="Inputs must be a list"):
+        calc.get_result()

@@ -44,12 +44,12 @@ services:
     
     # Command Execution
     # - `uvicorn`: An ASGI server for running FastAPI applications.
-    # - `app.main:app`: Points to the `app` instance in `app/main.py` (package-style layout).
+    # - `main:app`: Points to the `app` instance in `main.py` (project root).
     # - `--host 0.0.0.0`: Binds the server to all network interfaces, making it accessible externally.
     # - `--port 8000`: Sets the port on which the server will listen inside the container.
     # - `--reload`: Enables automatic reloading of the server when code changes are detected.
     command: > 
-      sh -c "uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+      sh -c "uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
     
     # Dependency
     depends_on:

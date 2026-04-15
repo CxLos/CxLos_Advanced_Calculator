@@ -97,3 +97,33 @@ def test_calculation_response_valid():
     assert calc_response.type == "subtraction"
     assert calc_response.inputs == [20, 5]
     assert calc_response.result == 15.5
+
+# ==============================================
+# Validator Coverage Tests
+# ==============================================
+
+def test_calculation_base_inputs_not_list():
+    """Test that CalculationCreate rejects non-list inputs via check_inputs_is_list."""
+    data = {
+        "type": "addition",
+        "inputs": "not-a-list",
+        "user_id": uuid4()
+    }
+    with pytest.raises(ValidationError) as exc_info:
+        CalculationCreate(**data)
+    assert "valid list" in str(exc_info.value).lower()
+
+def test_calculation_base_too_few_inputs():
+    """Test that CalculationCreate rejects inputs with fewer than 2 numbers."""
+    data = {
+        "type": "addition",
+        "inputs": [5],
+        "user_id": uuid4()
+    }
+    with pytest.raises(ValidationError):
+        CalculationCreate(**data)
+
+def test_calculation_update_too_few_inputs():
+    """Test that CalculationUpdate rejects inputs with fewer than 2 numbers."""
+    with pytest.raises(ValidationError):
+        CalculationUpdate(inputs=[5])

@@ -48,7 +48,7 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 
 # Run database initialization before starting the app
 CMD python -m app.database_init && \
-    uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
+    uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
 
 # CMD ["--url","http://github.com/cxlos"]
 # CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
