@@ -60,8 +60,8 @@ def get_current_user(
                     last_name="User",
                     is_active=True,
                     is_verified=False,
-                    created_at=datetime.utcnow(),
-                    updated_at=datetime.utcnow(),
+                    created_at=datetime.now(),
+                    updated_at=datetime.now(),
                 )
             else:
                 raise credentials_exception
@@ -76,8 +76,8 @@ def get_current_user(
                 last_name="User",
                 is_active=True,
                 is_verified=False,
-                created_at=datetime.utcnow(),
-                updated_at=datetime.utcnow(),
+                created_at=datetime.now(),
+                updated_at=datetime.now(),
             )
         else:
             raise credentials_exception

@@ -23,6 +23,12 @@ from app.models.mixin import TimestampMixin, UUIDMixin
 # Helper Functions
 # ==============================================
 
+settings = get_settings()
+
+def utcnow():
+    """Helper function to get current UTC datetime"""
+    return datetime.now(timezone.utc)
+
 class User(UUIDMixin, TimestampMixin, Base):
     """
     User model representing a user in the system.
