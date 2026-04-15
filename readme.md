@@ -267,6 +267,49 @@ This project uses [pytest](https://docs.pytest.org/) for testing. To run all tes
    ```
    Then open `htmlcov/index.html` in your browser to view detailed coverage results.
 
+# 🧪 Running Integration Tests
+
+Integration and end-to-end tests require a running PostgreSQL database. Use Docker Compose to spin up all services:
+
+1. **Start the application and database:**
+
+   ```bash
+   docker-compose up -d --build
+   ```
+
+2. **Run integration tests:**
+
+   ```bash
+   pytest tests/integration/
+   ```
+
+3. **Run end-to-end tests:**
+
+   ```bash
+   pytest tests/e2e/
+   ```
+
+4. **Tear down when finished:**
+
+   ```bash
+   docker-compose down
+   ```
+
+> **Note:** The CI/CD pipeline (GitHub Actions) automatically spins up a Postgres service and runs all test suites (unit, integration, and e2e) on every push to `main`.
+
+# 🔍 Manual Testing via OpenAPI
+
+Once the application is running (via `docker-compose up` or `uvicorn`), you can test endpoints interactively:
+
+- **Swagger UI:** [http://localhost:8000/docs](http://localhost:8000/docs)
+- **ReDoc:** [http://localhost:8000/redoc](http://localhost:8000/redoc)
+
+Use Swagger UI to:
+- Register a user via `POST /auth/register`
+- Login via `POST /auth/login` and copy the access token
+- Click **Authorize** and paste the token to test authenticated endpoints
+- Perform BREAD operations on calculations (`GET`, `POST`, `PUT`, `DELETE`)
+
 ---
 
 # 📎 Quick Links
