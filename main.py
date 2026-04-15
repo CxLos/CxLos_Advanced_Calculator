@@ -58,7 +58,7 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     print("Creating tables...")
     Base.metadata.create_all(bind=engine)
-    print("Tables created successfully!")
+    print(Fore.YELLOW + "Tables created successfully!")
     yield
 
 app = FastAPI(
@@ -71,6 +71,7 @@ app = FastAPI(
 # ------------------------------------------------------------------------------
 # Health Endpoint
 # ------------------------------------------------------------------------------
+
 @app.get("/health", tags=["health"])
 def read_health():
     return {"status": "ok"}
