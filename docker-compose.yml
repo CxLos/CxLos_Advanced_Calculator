@@ -35,19 +35,26 @@ services:
       - PYTHONDONTWRITEBYTECODE=1  # Prevents Python from writing `.pyc` files to disk. This ensures that only source code is maintained, keeping the container clean.
       - PYTHONUNBUFFERED=1  # Forces Python to flush the output buffer immediately. This is useful for real-time logging, ensuring that logs are visible as they are generated.
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/fastapi_db  # Connection string for the PostgreSQL database running in the 'db' service.
+      - TEST_DATABASE_URL=postgresql://postgres:postgres@db:5432/fastapi_test_db  # Separate database used during automated testing.
+      - JWT_SECRET_KEY=super-secret-key-for-jwt-min-32-chars  # Secret key used to sign access tokens.
+      - JWT_REFRESH_SECRET_KEY=super-refresh-secret-key-min-32-chars  # Secret key used to sign refresh tokens.
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30  # Number of minutes before an access token expires.
+      - REFRESH_TOKEN_EXPIRE_DAYS=7  # Number of days before a refresh token expires.
+      - BCRYPT_ROUNDS=12  # Work factor for bcrypt password hashing. Higher = more secure but slower.
     
     # Command Execution
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload  
-      # Specifies the command to run when the container starts.
-      # - `uvicorn`: An ASGI server for running FastAPI applications.
-      # - `main:app`: Points to the `app` instance in the `main.py` file, which is the FastAPI application.
-      # - `--host 0.0.0.0`: Binds the server to all network interfaces, making it accessible externally.
-      # - `--port 8000`: Sets the port on which the server will listen inside the container.
-      # - `--reload`: Enables automatic reloading of the server when code changes are detected. This is particularly useful during development for immediate feedback without manual restarts.
+    # - `uvicorn`: An ASGI server for running FastAPI applications.
+    # - `app.main:app`: Points to the `app` instance in `app/main.py` (package-style layout).
+    # - `--host 0.0.0.0`: Binds the server to all network interfaces, making it accessible externally.
+    # - `--port 8000`: Sets the port on which the server will listen inside the container.
+    # - `--reload`: Enables automatic reloading of the server when code changes are detected.
+    command: > 
+      sh -c "uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
     
     # Dependency
     depends_on:
-      - db  # Ensures the PostgreSQL database container starts before the web service.
+      db:
+        condition: service_healthy  # Waits for the db healthcheck to pass before starting the web service.
     
     # Networking
     networks:
@@ -69,8 +76,9 @@ services:
       - "5432:5432"  # Maps the default PostgreSQL port to the host for direct access.
     volumes:
       - postgres_data:/var/lib/postgresql/data  # Persists database data across container restarts.
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh  # Initialization script to create additional databases (e.g., test DB) on first run.
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]  # Checks if PostgreSQL is ready to accept connections.
+      test: ["CMD-SHELL", "pg_isready -U postgres -d fastapi_db"]  # Checks if PostgreSQL is ready and the target DB is accessible.
       interval: 10s
       timeout: 5s
       retries: 5
