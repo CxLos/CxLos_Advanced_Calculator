@@ -252,7 +252,7 @@ def fastapi_server():
             raise ServerStartupError("Failed to start test server")
 
         logger.info("Test server started successfully.")
-        yield  # Run all tests that depend on this fixture
+        yield server_url  # Run all tests that depend on this fixture
 
     except Exception as e:
         logger.error(f"Server error: {str(e)}")

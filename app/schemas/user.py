@@ -7,6 +7,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 from pydantic import BaseModel, EmailStr, ConfigDict
+from app.schemas.base import UserCreate
 
 # ==================================
 # Authentication Schemas

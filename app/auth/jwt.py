@@ -9,7 +9,7 @@ from uuid import UUID
 import secrets
 
 from app.core.config import get_settings
-from app.auth.redis import add_to_blacklist, is_blacklisted
+from app.auth.redis_client import add_to_blacklist, is_blacklisted
 from app.schemas.token import TokenType
 from app.database import get_db
 from sqlalchemy.orm import Session
