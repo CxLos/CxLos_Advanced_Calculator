@@ -207,18 +207,21 @@ class CalculationUpdate(BaseModel):
     """
     Schema for updating an existing Calculation.
     
-    This schema allows clients to update the inputs of an existing
-    calculation. All fields are optional since partial updates are allowed.
-    
-    Note: The calculation type cannot be changed after creation. If you need
-    a different type, create a new calculation.
+    All fields are optional since partial updates are allowed.
     """
+    type: Optional[CalculationType] = Field(
+        None,
+        description="Updated calculation type",
+        examples=["addition"]
+    )
     inputs: Optional[List[float]] = Field(
         None,
         description="Updated list of numeric inputs for the calculation",
         examples=[[42, 7]],
         min_length=2
     )
+
+
 
     @model_validator(mode='after')
     def validate_inputs(self) -> "CalculationUpdate":
@@ -239,7 +242,7 @@ class CalculationUpdate(BaseModel):
 
     model_config = ConfigDict(
         from_attributes=True,
-        json_schema_extra={"example": {"inputs": [42, 7]}}
+        json_schema_extra={"example": {"type": "addition", "inputs": [42, 7]}}
     )
 
 

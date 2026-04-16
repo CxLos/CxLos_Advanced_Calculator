@@ -237,17 +237,31 @@ def update_calculation(
     calculation = db.query(Calculation).filter(
         Calculation.id == calc_uuid,
         Calculation.user_id == current_user.id
-    ).first()
+    ).first() # Try to find the calculation by ID and ensure it belongs to the current user
     if not calculation:
         raise HTTPException(status_code=404, detail="Calculation not found.")
 
-    if calculation_update.inputs is not None:
-        calculation.inputs = calculation_update.inputs
-        calculation.result = calculation.get_result()
-    calculation.updated_at = datetime.utcnow()
-    db.commit()
-    db.refresh(calculation)
-    return calculation
+    try:
+        new_type = calculation_update.type.value if calculation_update.type is not None else calculation.type
+        new_inputs = calculation_update.inputs if calculation_update.inputs is not None else calculation.inputs
+
+        temp = Calculation.create(
+            calculation_type=new_type,
+            user_id=current_user.id,
+            inputs=new_inputs,
+        )
+        new_result = temp.get_result()
+
+        calculation.type = new_type
+        calculation.inputs = new_inputs
+        calculation.result = new_result
+        calculation.updated_at = datetime.now()
+        db.commit()
+        db.refresh(calculation)
+        return calculation
+    except ValueError as e:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 # Delete a Calculation
 @app.delete("/calculations/{calc_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["calculations"])

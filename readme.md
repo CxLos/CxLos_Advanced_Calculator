@@ -35,13 +35,15 @@ Hello and Welcome to my docker practice repo! here is where you will see me lear
 
 ![Docker server logs](screenshots/image2.png)
 
-## User Registration/ Login
+## Successful User Registration/ Login
 
-![User registration/ login endpoints](screenshots/image.png)
+![User registration/ login endpoints](screenshots/image4.png)
 
-## Calculation Endpoints
+## Successful Calculation Endpoints
 
-![Calculation endpoints](screenshots/image.png)
+![Calculation create](screenshots/image5.png)
+
+![Calculation endpoints](screenshots/image6.png)
 
 ## Successful Github Actions run
 
