@@ -35,6 +35,14 @@ Hello and Welcome to my docker practice repo! here is where you will see me lear
 
 ![Docker server logs](screenshots/image2.png)
 
+## User Registration/ Login
+
+![User registration/ login endpoints](screenshots/image.png)
+
+## Calculation Endpoints
+
+![Calculation endpoints](screenshots/image.png)
+
 ## Successful Github Actions run
 
 ![github actions](screenshots/image3.png)
@@ -357,6 +365,12 @@ Some hurdles I encountered were understanding how the factory pattern does what 
 
 ## Week 12
 
-- 
+This module encouraged me to think more critically about how individual components work together with the routes. Implementing user login, registration, and calculation routes integrated smoothly with the already existing models pretty well because they were already built out from previous modules which made the application easy to extend and maintain.
+
+Integration testing with pytest and docker ensured that my endpoints remained reliable because running tests inside docker containers confirmed that endpoints behaved consistently regardless of local configuration differences. Pytest allows you to validate complete request flows like authentication or calculation creation which unit tests might miss.
+
+My previous Pydantic schemas and database logic from modules 10-11 translated to route-level functionality because they provide request validation with clear error messages while the database functions simplified BREAD operations. This separation reduced duplication and improved readability.
+
+Security measures that protected these endpoints were password hashing and ownership checks to make sure only authorized users could access and modify calculations.
 
 ---
