@@ -69,6 +69,9 @@ class User(UUIDMixin, TimestampMixin, Base):
     is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=False)
 
+    # Tracks when the user last authenticated
+    last_login = Column(DateTime(timezone=True), nullable=True)
+
     # Relationship to calculations
     # back_populates creates a bidirectional relationship
     # cascade="all, delete-orphan" ensures calculations are deleted

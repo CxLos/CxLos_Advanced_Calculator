@@ -4,6 +4,8 @@ import pytest  # Import the pytest framework for writing and running tests
 from fastapi.testclient import TestClient  # Import TestClient for simulating API requests
 from main import app  # Import the FastAPI app instance from your main application file
 
+pytestmark = pytest.mark.skip(reason="Old endpoints /add, /subtract, /multiply, /divide replaced by BREAD /calculations routes")
+
 # ---------------------------------------------
 # Pytest Fixture: client
 # ---------------------------------------------

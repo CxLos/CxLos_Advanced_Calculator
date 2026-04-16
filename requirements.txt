@@ -3,7 +3,7 @@ annotated-types==0.7.0
 anyio==4.6.2.post1
 astroid==3.3.5
 async-timeout==5.0.1
-bcrypt==4.0.1
+bcrypt==3.2.2
 cffi>=1.17.1
 certifi==2024.8.30
 charset-normalizer==3.4.0
