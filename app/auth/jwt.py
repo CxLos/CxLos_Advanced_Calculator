@@ -1,4 +1,10 @@
+
 # app/auth/jwt.py
+
+# =============================================
+# Imports
+# =============================================
+
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional, Union
 from jose import jwt, JWTError

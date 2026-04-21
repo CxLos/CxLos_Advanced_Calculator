@@ -1,7 +1,8 @@
 
 """
 Main application for the Advanced Calculator API.
-This module sets up the FastAPI application, defines the API routes for performing calculations, and includes error handling for invalid inputs and operations. It also serves the frontend interface and provides a health check endpoint for Docker."""
+This module sets up the FastAPI application, defines the API routes for performing calculations, and includes error handling for invalid inputs and operations. It also serves the frontend interface and provides a health check endpoint for Docker.
+"""
 
 # =================================
 # Imports
@@ -12,10 +13,16 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone, timedelta
 from uuid import UUID
 from typing import List
-from fastapi import Body, FastAPI, Depends, HTTPException, status
+# --------------------------------
+from fastapi import Body, FastAPI, Depends, HTTPException, status, Request, Form
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+# --------------------------------
 from sqlalchemy.orm import Session
-
+import uvicorn
+# --------------------------------
 from app.auth.dependencies import get_current_active_user
 from app.models.calculation import Calculation
 from app.models.user import User
@@ -43,7 +50,7 @@ for color_name in dir(colorama.Fore):
 # Get current file path
 # print(f"Current file path: {Path(__file__).resolve()}")
 
-# =========== Main Code =========== #
+# ========================= Main Code ========================= #
 
 # Seting up logging configuration for the application. This will allow us to log important information and errors during the execution of the application, which is crucial for debugging and monitoring purposes.
 logging.basicConfig(
@@ -61,12 +68,44 @@ async def lifespan(app: FastAPI):
     print(Fore.YELLOW + "Tables created successfully!")
     yield
 
+# App
 app = FastAPI(
     title="Calculations API",
     description="API for managing calculations",
     version="1.0.0",
     lifespan=lifespan
 )
+
+# ------------------------------------------------------------------------------
+# H
+# ------------------------------------------------------------------------------
+
+# Mount the static files directory
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Set up Jinja2 templates directory
+templates = Jinja2Templates(directory="templates")
+
+# Home page route
+@app.get("/", response_class=HTMLResponse, tags=["web"])
+def read_index(request: Request):
+    return templates.TemplateResponse(request, "index.html")
+
+# Login page route
+@app.get("/login", response_class=HTMLResponse, tags=["web"])
+def login_page(request: Request):
+    return templates.TemplateResponse(request, "login.html")
+
+# Registration page route
+@app.get("/register", response_class=HTMLResponse, tags=["web"])
+def register_page(request: Request):
+    return templates.TemplateResponse(request, "register.html")
+
+# Dashboard page Route
+
+@app.get("/dashboard", response_class=HTMLResponse, tags=["web"])
+def dashboard_page(request: Request):
+    return templates.TemplateResponse(request, "dashboard.html")
 
 # ------------------------------------------------------------------------------
 # Health Endpoint
@@ -79,6 +118,7 @@ def read_health():
 # ------------------------------------------------------------------------------
 # User Registration Endpoint
 # ------------------------------------------------------------------------------
+
 @app.post(
     "/auth/register", 
     response_model=UserResponse, 
@@ -100,6 +140,7 @@ def register(user_create: UserCreate, db: Session = Depends(get_db)):
 # ------------------------------------------------------------------------------
 # User Login Endpoints
 # ------------------------------------------------------------------------------
+
 @app.post("/auth/login", response_model=TokenResponse, tags=["auth"])
 def login_json(user_login: UserLogin, db: Session = Depends(get_db)):
     """Login with JSON payload"""
