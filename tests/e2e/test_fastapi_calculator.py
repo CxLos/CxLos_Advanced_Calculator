@@ -41,6 +41,25 @@ def register_and_login(base_url: str, user_data: dict) -> dict:
     return login_response.json()
 
 # ---------------------------------------------------------------------------
+# Registration and Login Validation Tests
+# ---------------------------------------------------------------------------
+
+def test_user_registration_validation(base_url: str):
+    url = f"{base_url}/auth/register"
+    payload = {
+        "first_name": "Test",
+        "last_name": "User",
+        "email": "invalid-email-format",
+        "username": "testuser",
+        "password": "SecurePass123!",
+        "confirm_password": "SecurePass123!"
+    }
+    response = requests.post(url, json=payload)
+    assert response.status_code == 422, f"Expected 422 but got {response.status_code}. Response: {response.text}"
+    errors = response.json().get("detail", [])
+    assert any("email" in str(error) for error in errors), "Expected validation error for invalid email format."
+
+# ---------------------------------------------------------------------------
 # Health and Auth Endpoint Tests
 # ---------------------------------------------------------------------------
 def test_health_endpoint(base_url: str):
