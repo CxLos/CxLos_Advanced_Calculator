@@ -2,11 +2,11 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #3280c0;
+    background-color: #53a8ee;
 }
 
 header, footer {
-    background-color: #c82e2e;
+    background-color: #005ae1;
     padding: 1rem;
     text-align: center;
 }
@@ -14,7 +14,34 @@ header, footer {
 nav a {
     margin: 0 1rem;
     text-decoration: none;
-    color: #333;
+    color: #e8e8e8;
+}
+
+nav a:hover {
+    opacity: 0.7;
+    padding: 5px;
+    border: 2px solid #e8e8e8;
+    border-radius: 5px;
+}
+
+nav a:active {
+    display: inline-block;
+    transform: translateY(2px);
+}
+
+header h1 {
+    /* color: #ffffff; */
+        color:#fd9400;
+}
+
+header h1:hover {
+    transform: rotate(180deg);
+    display: inline-block;
+    color:#ff4646;
+}
+
+footer p {
+    color: #ffffff;
 }
 
 main {

@@ -77,7 +77,9 @@
   </div>
 </div>
 
+<!-- JavaScript for handling form submission and validation -->
 <script>
+  // This code is to handle the registration form submission and client-side validation
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('registrationForm');
     const errorAlert = document.getElementById('errorAlert');
@@ -94,9 +96,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Helper function to show success
     function showSuccess(message) {
-        successMessage.textContent = message;
-        successAlert.classList.remove('hidden');
-        errorAlert.classList.add('hidden');
+        successMessage.textContent = message; // Set the success message text
+        successAlert.classList.remove('hidden'); // Show the success alert
+        errorAlert.classList.add('hidden'); // Hide the error alert
     }
 
     // Helper function to validate email format
