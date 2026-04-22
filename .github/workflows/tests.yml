@@ -70,13 +70,27 @@ jobs:
  # ============================================================================
  test:
    runs-on: ubuntu-latest
+   services:
+     db:
+       image: postgres:15
+       ports:
+         - 5432:5432
+       env:
+         POSTGRES_USER: postgres
+         POSTGRES_PASSWORD: postgres
+         POSTGRES_DB: app
+       options: >-
+         --health-cmd="pg_isready -U postgres"
+         --health-interval=10s
+         --health-timeout=5s
+         --health-retries=5
    steps:
 
      # STEP 1: Clone the repository into the runner's workspace
      - uses: actions/checkout@v4
 
      # STEP 2: Install Python 3.10 — ensures a consistent interpreter version
-     - uses: actions/setup-python@v6
+     - uses: actions/setup-python@v5
        with:
          python-version: '3.10'
 
@@ -99,13 +113,15 @@ jobs:
          python -m venv venv
          source venv/bin/activate
          pip install -r requirements.txt
-         playwright install
+         playwright install --with-deps
 
      # STEP 5: Execute all three test layers in order:
      #   - Unit tests   : fast, isolated, no external dependencies
      #   - Integration  : test interaction between internal components
      #   - E2E tests    : simulate real user flows in a browser via Playwright
      - name: Run tests
+       env:
+         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/app
        run: |
          source venv/bin/activate
          pytest tests/unit/ --cov=main --cov=app --junitxml=test-results/junit.xml
@@ -230,5 +246,5 @@ jobs:
            cxlos/601_module8:${{ github.sha }}
          platforms: linux/amd64,linux/arm64
          cache-from: type=registry,ref=cxlos/601_module8:cache
-         cache-to: type=inline,mode=max
+         cache-to: type=inline
 # ============================================================================
