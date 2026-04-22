@@ -137,5 +137,3 @@ cython_debug/
 
 # JupyterLab
 .jupyterlab-config
-
-.trivyignore
