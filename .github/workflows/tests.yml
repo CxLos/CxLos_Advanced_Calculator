@@ -243,9 +243,9 @@ jobs:
        with:
          push: true
          tags: |
-           cxlos/601_module8:latest
-           cxlos/601_module8:${{ github.sha }}
+           cxlos/cxlos_advanced_calculator:latest
+           cxlos/cxlos_advanced_calculator:${{ github.sha }}
          platforms: linux/amd64,linux/arm64
-         cache-from: type=registry,ref=cxlos/601_module8:cache
+         cache-from: type=registry,ref=cxlos/cxlos_advanced_calculator:cache
          cache-to: type=inline
 # ============================================================================
