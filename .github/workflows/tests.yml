@@ -153,32 +153,28 @@ jobs:
  #
  #   IF the scan fails → the deploy job is blocked and will not run
  # ============================================================================
- security:
-   needs: test
-   runs-on: ubuntu-latest
-   steps:
+security:
+  needs: test
+  runs-on: ubuntu-latest
+  steps:
 
-     # STEP 1: Clone the repository to access the Dockerfile
-     - uses: actions/checkout@v4
+    # STEP 1: Clone the repository to access the Dockerfile
+    - uses: actions/checkout@v4
 
-     # STEP 2: Build the Docker image locally using the project Dockerfile.
-     #   Tagged as 'app:test' for identification during scanning.
-     - name: Build image
-       run: docker build --no-cache -t app:test .
+    # STEP 2: Build the Docker image locally using the project Dockerfile.
+    #   Tagged as 'app:test' for identification during scanning.
+    - name: Build image
+      run: docker build --no-cache -t app:test .
 
-     # STEP 3: Run Trivy to scan the built image for security vulnerabilities.
-     #   Fails the pipeline (exit-code: 1) if CRITICAL or HIGH CVEs are found
-     #   that have a known fix available, preventing insecure images from
-     #   reaching production.
-     - name: Run Trivy vulnerability scanner
-       uses: aquasecurity/trivy-action@master
-       with:
-         image-ref: 'app:test'
-         format: 'table'
-         exit-code: '1'
-         ignore-unfixed: true
-         severity: 'CRITICAL,HIGH'
-         trivyignores: .trivyignore
+    # STEP 3: Run Trivy to scan the built image for security vulnerabilities.
+    #   Fails the pipeline (exit-code: 1) if CRITICAL or HIGH CVEs are found
+    #   that have a known fix available.
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: app:test
+        ignorefile: .trivyignore
+        exit-code: 1
 
  # ============================================================================
  # JOB 3: deploy
