@@ -238,32 +238,70 @@ def seed_users(db_session: Session, request) -> List[User]:
 def fastapi_server():
     """
     Start and manage a FastAPI test server, if needed for integration tests.
+
+    PSEUDOCODE:
+    ─────────────────────────────────────────────────────────────
+    DEFINE the server URL we expect the app to run on
+
+    TRY:
+        LAUNCH the FastAPI app as a background subprocess
+            (same as running `uvicorn app.main:app` in your terminal,
+             but done programmatically so pytest controls it)
+
+        WAIT up to 30 seconds for the server to respond on that URL
+            IF it never responds → RAISE ServerStartupError (abort tests)
+
+        LOG that the server is up
+
+        YIELD the server URL to any test that requests this fixture
+            (all tests using `fastapi_server` or `base_url` run HERE,
+             while the subprocess is still alive)
+
+    EXCEPT any error:
+        LOG the error and re-raise it (so pytest reports the failure)
+
+    FINALLY (always runs, even if tests fail):
+        SEND a terminate signal to the subprocess (graceful shutdown)
+        WAIT up to 5 seconds for it to exit cleanly
+            IF it doesn't exit in time → FORCE KILL the process
+    ─────────────────────────────────────────────────────────────
     """
+    # STEP 1: Define the URL where the test server will run
     server_url = 'http://127.0.0.1:8000/'
     logger.info("Starting test server...")
 
     try:
+        # STEP 2: Spawn the FastAPI app as a child process in the background.
+        # stdout/stderr are piped so they don't clutter the pytest output.
         process = subprocess.Popen(
-            ['python', 'main.py'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            ['python', '-m', 'uvicorn', 'app.main:app',
+             '--host', '127.0.0.1', '--port', '8000'],
         )
+        
+        # STEP 3: Poll the /health (or root) endpoint every second until the
+        # server replies with 200 OK, or 30 seconds pass (timeout).
         if not wait_for_server(server_url, timeout=30):
             raise ServerStartupError("Failed to start test server")
 
         logger.info("Test server started successfully.")
+
+        # STEP 4: Hand the URL to dependent fixtures/tests and pause here.
+        # Everything between yield and finally is the "test window".
         yield server_url  # Run all tests that depend on this fixture
 
     except Exception as e:
+        # STEP 5: If startup failed, log and propagate the error.
         logger.error(f"Server error: {str(e)}")
         raise
     finally:
+        # STEP 6: After all tests finish (or on error), shut down the subprocess.
         logger.info("Terminating test server...")
-        process.terminate()
+        process.terminate()  # Ask the OS to stop the process gracefully (SIGTERM)
         try:
-            process.wait(timeout=5)
+            process.wait(timeout=5)  # Give it 5 seconds to exit on its own
             logger.info("Test server terminated gracefully.")
         except subprocess.TimeoutExpired:
+            # STEP 7: If it's still running after 5 seconds, force-kill it (SIGKILL)
             logger.warning("Test server did not terminate in time; killing it.")
             process.kill()
 

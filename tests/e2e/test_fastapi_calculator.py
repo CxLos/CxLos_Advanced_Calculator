@@ -1,3 +1,8 @@
+
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
+
 from datetime import datetime, timezone
 from uuid import uuid4
 import pytest
@@ -9,6 +14,7 @@ from app.models.calculation import Calculation
 # ---------------------------------------------------------------------------
 # Helper Fixtures and Functions
 # ---------------------------------------------------------------------------
+
 @pytest.fixture(scope="session")
 def base_url(fastapi_server: str) -> str:
     """
@@ -59,9 +65,157 @@ def test_user_registration_validation(base_url: str):
     errors = response.json().get("detail", [])
     assert any("email" in str(error) for error in errors), "Expected validation error for invalid email format."
 
+def test_user_login_via_form(base_url: str):
+    reg_url = f"{base_url}/auth/register"
+    login_url = f"{base_url}/auth/login"
+
+    test_user = {
+        "first_name" : "Form",
+        "last_name" : "Login",
+        "email" : "form.login@example.com",
+        "username" : "formloginuser",
+        "password" : "Pass321!",
+        "confirm_password" : "Pass321!",
+    }
+    reg_response = requests.post(reg_url, json=test_user)
+    assert reg_response.status_code == 201, f"Registration failed: {reg_response.text}" 
+
+    login_payload = {
+        "username" : test_user["username"],
+        "password" : test_user["password"]
+    }
+    login_response = requests.post(login_url, json=login_payload)
+
+    assert login_response.status_code == 200, f"login failed: {login_response.text}"
+    data = login_response.json()
+    assert "access_toke" in data, "access_token missing from response"
+    assert "refresh_token" in data, "refresh_token missing from response"
+    assert data["token_type"].lower() == "bearer"
+    assert data["username"] == test_user["username"]
+
+def test_short_password(base_url: str):
+    """
+    Test that checks if user registration fails if the password the enter is too short.
+    """
+
+    reg_url = f"{base_url}/auth/register"
+
+    test_user = {
+        "first_name" : "Form",
+        "last_name" : "Login",
+        "email" : "form.login@example.com",
+        "username" : "formloginuser",
+        "password" : "Pass3!",
+        "confirm_password" : "Pass3!",
+    }
+
+    response = requests.post(reg_url, json=test_user)
+    assert response.status_code == 422, f"Expected 422 but got {response.status_code}. Response: {response.text}"
+    errors = response.json().get("detail", [])
+    assert any("password" in str(error) for error in errors), "Expected validation error for short password."
+
+def test_wrong_password(base_url: str):
+    """
+    Test that confirms entering the wrong password throws an error
+    """
+    reg_url = f"{base_url}/auth/register"
+    login_url = f"{base_url}/auth/login"
+
+    test_user = {
+        "first_name" : "Form",
+        "last_name" : "Login",
+        "email" : "form.login@example.com",
+        "username" : "formloginuser",
+        "password" : "Pass3333!",
+        "confirm_password" : "Pass3333!",
+    }
+
+    reg_response = requests.post(reg_url, json=test_user)
+    assert reg_response.status_code == 201, f"Registration failed: {reg_response.text}"
+
+    login_payload = {
+        "username" : test_user["username"],
+        "password" : test_user["password"]
+    }
+    login_response = requests.post(login_url, json=login_payload)
+
+    assert login_response.status_code == 401,  f"Expected 401 but got {login_response.status_code}. Response: {login_response.text}"
+
+def test_use_form_fields(page, fastapi_server: str):
+    """
+    Test that all expected form fields on the register page can be located
+    and filled. The act of page.fill() succeeds only if the field exists —
+    if any selector is wrong, Playwright raises an error and the test fails.
+    """
+    page.goto(f"{fastapi_server}register")
+
+    # Locate each field by its HTML id and type a value into it
+    page.fill("#username", "fieldtestuser")
+    page.fill("#email", "fieldtest@example.com")
+    page.fill("#first_name", "Field")
+    page.fill("#last_name", "Test")
+    page.fill("#password", "SecurePass123!")
+    page.fill("#confirm_password", "SecurePass123!")
+
+    # Confirm the submit button is present and clickable
+    assert page.is_enabled("button[type='submit']"), "Submit button should be enabled."
+
+def test_registration_success_message(page, fastapi_server: str):
+    """
+    POSITIVE UI TEST: Fill the register form with valid data, submit it,
+    and confirm the green success alert appears on the page.
+    """
+    page.goto(f"{fastapi_server}register")
+
+    # Fill all required fields with valid data
+    page.fill("#username", f"successmsg_{uuid4().hex[:8]}")
+    page.fill("#email", f"success.msg.{uuid4().hex[:6]}@example.com")
+    page.fill("#first_name", "Success")
+    page.fill("#last_name", "Message")
+    page.fill("#password", "SecurePass123!")
+    page.fill("#confirm_password", "SecurePass123!")
+
+    page.click("button[type='submit']")
+
+    # Wait for the JS to receive the 201 response and unhide #successAlert
+    page.wait_for_selector("#successAlert:not(.hidden)", timeout=5000)
+    assert page.is_visible("#successAlert"), "Success alert should be visible after valid registration."
+
+def test_token_stored(page, fastapi_server: str, base_url: str):
+    """
+    POSITIVE UI TEST: Log in through the browser form and confirm that
+    the access_token is saved in localStorage by the page's JavaScript.
+    """
+    # Pre-register a user via the API so we have known credentials
+    user_data = {
+        "first_name": "Token",
+        "last_name": "Store",
+        "email": f"token.store.{uuid4().hex[:6]}@example.com",
+        "username": f"tokenstore_{uuid4().hex[:8]}",
+        "password": "SecurePass123!",
+        "confirm_password": "SecurePass123!"
+    }
+    reg_response = requests.post(f"{base_url}/auth/register", json=user_data)
+    assert reg_response.status_code == 201, f"Pre-registration failed: {reg_response.text}"
+
+    # Navigate to the login page and submit valid credentials
+    page.goto(f"{fastapi_server}login")
+    page.fill("#username", user_data["username"])
+    page.fill("#password", user_data["password"])
+    page.click("button[type='submit']")
+
+    # Wait for the JS to finish the login request and store the token
+    page.wait_for_selector("#successAlert:not(.hidden)", timeout=5000)
+
+    # Read the value from localStorage using page.evaluate (runs JS in the browser)
+    token = page.evaluate("localStorage.getItem('access_token')")
+    assert token is not None, "access_token should be stored in localStorage after login."
+    assert len(token) > 0, "access_token in localStorage should not be empty."
+
 # ---------------------------------------------------------------------------
 # Health and Auth Endpoint Tests
 # ---------------------------------------------------------------------------
+
 def test_health_endpoint(base_url: str):
     url = f"{base_url}/health"
     response = requests.get(url)
@@ -152,6 +306,7 @@ def test_user_login(base_url: str):
 # ---------------------------------------------------------------------------
 # Calculations Endpoints Integration Tests
 # ---------------------------------------------------------------------------
+
 # Note: All calculation creation requests now use the /calculations endpoint (not /calculations/add)
 def test_create_calculation_addition(base_url: str):
     user_data = {
@@ -309,6 +464,7 @@ def test_list_get_update_delete_calculation(base_url: str):
 # ---------------------------------------------------------------------------
 # Direct Model Tests for Calculation Operations
 # ---------------------------------------------------------------------------
+
 def test_model_addition():
     dummy_user_id = uuid4()
     calc = Calculation.create("addition", dummy_user_id, [1, 2, 3])
