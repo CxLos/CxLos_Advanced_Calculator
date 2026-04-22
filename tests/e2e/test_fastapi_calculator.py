@@ -88,7 +88,7 @@ def test_user_login_via_form(base_url: str):
 
     assert login_response.status_code == 200, f"login failed: {login_response.text}"
     data = login_response.json()
-    assert "access_toke" in data, "access_token missing from response"
+    assert "access_token" in data, "access_token missing from response"
     assert "refresh_token" in data, "refresh_token missing from response"
     assert data["token_type"].lower() == "bearer"
     assert data["username"] == test_user["username"]
@@ -121,21 +121,23 @@ def test_wrong_password(base_url: str):
     reg_url = f"{base_url}/auth/register"
     login_url = f"{base_url}/auth/login"
 
+    # Use uuid4() to guarantee a unique user — avoids "already exists" errors
     test_user = {
-        "first_name" : "Form",
-        "last_name" : "Login",
-        "email" : "form.login@example.com",
-        "username" : "formloginuser",
-        "password" : "Pass3333!",
-        "confirm_password" : "Pass3333!",
+        "first_name" : "Wrong",
+        "last_name" : "Pass",
+        "email" : f"wrong.pass.{uuid4().hex[:8]}@example.com",
+        "username" : f"wrongpass_{uuid4().hex[:8]}",
+        "password" : "SecurePass123!",
+        "confirm_password" : "SecurePass123!",
     }
 
     reg_response = requests.post(reg_url, json=test_user)
     assert reg_response.status_code == 201, f"Registration failed: {reg_response.text}"
 
+    # Send a DIFFERENT password so the login should fail with 401
     login_payload = {
         "username" : test_user["username"],
-        "password" : test_user["password"]
+        "password" : "TotallyWrongPassword!"
     }
     login_response = requests.post(login_url, json=login_payload)
 

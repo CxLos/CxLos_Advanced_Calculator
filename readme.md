@@ -375,4 +375,15 @@ My previous Pydantic schemas and database logic from modules 10-11 translated to
 
 Security measures that protected these endpoints were password hashing and ownership checks to make sure only authorized users could access and modify calculations.
 
+## Week 13
+
+Adding a JWT-based login/registration flow helped me see the full stack as one continuous system instead of separate frontend/backend tasks. I had to align the UI form fields with request schemas, handle error messages from the API, and then persist auth state on the client so protected routes behaved correctly. That tight feedback loop made it clearer how small choices affect the user experience.
+
+Playwright E2E tests were especially valuable because they verify the entire workflow the way a user experiences it. From typing into the form, triggering client-side validation, submitting to the backend, and confirming navigation/state changes. Testing both valid and invalid scenarios, like short passwords or wrong credentials, gave me confidence that failures are handled gracefully and consistently.
+
+On the client, I enforced basic checks like email format validation and a minimum password length before allowing submission. For token handling, I stored the JWT in localStorage and attached it on subsequent API calls so authentication persisted across refreshes. These client-side measures don’t replace server-side security, but they complement it.
+
+The hardest parts were getting JWT generation/verification correct, making sure the front end stored the token at the right moment, and running Playwright reliably in the Docker environment. I worked through these by logging decoded token claims during development.
+
+
 ---
