@@ -1,9 +1,13 @@
 
-from .operations import add, subtract, multiply, divide
+from .operations import add, subtract, multiply, divide, floor, modulus, power, sqrt
 
 __all__ = [
   'add', 
   'subtract', 
   'multiply', 
-  'divide'
-]  # Define the public API of the module
+  'divide',
+  'floor',
+  'modulus',
+  'power',
+  'sqrt'
+] 

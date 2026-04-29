@@ -47,9 +47,11 @@ from app.database import Base, get_db, engine
 
 # Import operations for simple calculator endpoints
 try:
-    from app.operations import add, subtract, multiply, divide
+    from app.operations import add, subtract, multiply, divide, floor, modulus, power, sqrt
 except ImportError:
-    add = subtract = multiply = divide = None
+    add = subtract = multiply = divide = floor = modulus = power = sqrt = None
+
+# --------------------------------
 
 # Pydantic models for simple calculator endpoints
 from pydantic import BaseModel, Field, field_validator
@@ -60,12 +62,12 @@ class OperationRequest(BaseModel):
 
     @field_validator('a', 'b')
     def validate_numbers(cls, value):
-        if not isinstance(value, (int, float)):
+        if not isinstance(value, (int, float)): # Ensure the value is a number (int or float)
             raise ValueError('Both a and b must be numbers.')
         return value
 
 class OperationResponse(BaseModel):
-    result: float = Field(..., description="The result of the operation")
+    result: float = Field(..., description="The result of the operation") # The result will always be a float, even if the inputs are integers (e.g., 2 + 3 will return 5.0)
 
 class ErrorResponse(BaseModel):
     error: str = Field(..., description="Error message")
@@ -89,7 +91,9 @@ for color_name in dir(colorama.Fore):
 # Get current file path
 # print(f"Current file path: {Path(__file__).resolve()}")
 
-# ========================= Main Code ========================= #
+# =================================
+# Logging Configuration
+# =================================
 
 # Seting up logging configuration for the application. This will allow us to log important information and errors during the execution of the application, which is crucial for debugging and monitoring purposes.
 logging.basicConfig(
@@ -107,6 +111,9 @@ async def lifespan(app: FastAPI):
     print(Fore.YELLOW + "Tables created successfully!")
     yield
 
+# ===================================
+# FastAPI Application Initialization
+# ===================================
 
 # App
 app = FastAPI(
@@ -321,7 +328,11 @@ def login_form(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = D
 # ------------------------------------------------------------------------------
 
 # Simple calculator endpoints
-@app.post("/add", response_model=OperationResponse, responses={400: {"model": ErrorResponse}})
+@app.post(
+    "/add", # Endpoint for addition operation
+    response_model=OperationResponse, # The response will contain the result of the addition
+    responses={400: {"model": ErrorResponse}} # Define a custom error response model for validation errors
+)
 async def add_route(operation: OperationRequest):
     if add is None:
         raise HTTPException(status_code=500, detail="Add operation not implemented.")
@@ -367,6 +378,50 @@ async def divide_route(operation: OperationRequest):
     except Exception as e:
         logger.error(f"Divide Operation Internal Error: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
+    
+@app.post("/floor", response_model=OperationResponse, responses={400: {"model": ErrorResponse}})
+async def floor_route(operation: OperationRequest):
+    if floor is None:
+        raise HTTPException(status_code=500, detail="Floor operation not implemented.")
+    try:
+        result = floor(operation.a, operation.b)
+        return OperationResponse(result=result)
+    except Exception as e:
+        logger.error(f"Floor Operation Error: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@app.post("/modulus", response_model=OperationResponse, responses={400: {"model": ErrorResponse}})
+async def modulus_route(operation: OperationRequest):
+    if modulus is None:
+        raise HTTPException(status_code=500, detail="Modulus operation not implemented.")
+    try:
+        result = modulus(operation.a, operation.b)
+        return OperationResponse(result=result)
+    except Exception as e:
+        logger.error(f"Modulus Operation Error: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+        
+@app.post("/power", response_model=OperationResponse, responses={400: {"model": ErrorResponse}})
+async def power_route(operation: OperationRequest):
+    if power is None:
+        raise HTTPException(status_code=500, detail="Power operation not implemented.")
+    try:
+        result = power(operation.a, operation.b)
+        return OperationResponse(result=result)
+    except Exception as e:
+        logger.error(f"Power Operation Error: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@app.post("/sqrt", response_model=OperationResponse, responses={400: {"model": ErrorResponse}})
+async def sqrt_route(operation: OperationRequest):
+    if sqrt is None:
+        raise HTTPException(status_code=500, detail="Square root operation not implemented.")
+    try:
+        result = sqrt(operation.a)
+        return OperationResponse(result=result)
+    except Exception as e:
+        logger.error(f"Square Root Operation Error: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
 
 # ------------------------------------------------------------------------------
 # Calculations Endpoints (BREAD)

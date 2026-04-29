@@ -23,6 +23,7 @@ These schemas act as DTOs, defining contracts between API and clients.
 # Imports
 # ==============================================
 
+# Enum is a standard library for creating enumerations, which are a set of symbolic names bound to unique, constant values. We use it to define valid calculation types.
 from enum import Enum
 from pydantic import (
     BaseModel,
@@ -57,7 +58,7 @@ class CalculationType(str, Enum):
     MULTIPLICATION = "multiplication"
     DIVISION = "division"
     POWER = "power"
-    SQRT = "square_root"
+    SQRT = "sqrt"
     MODULUS = "modulus"
     FLOOR = "floor"
 
@@ -159,7 +160,7 @@ class CalculationBase(BaseModel):
             raise ValueError(
                 "At least two numbers are required for calculation"
             )
-        if self.type == CalculationType.DIVISION:
+        if self.type in {CalculationType.DIVISION, CalculationType.FLOOR, CalculationType.MODULUS}:
             # Prevent division by zero (skip first value as numerator)
             if any(x == 0 for x in self.inputs[1:]):
                 raise ValueError("Cannot divide by zero")

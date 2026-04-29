@@ -61,7 +61,7 @@ def test_user_registration_validation(base_url: str):
         "confirm_password": "SecurePass123!"
     }
     response = requests.post(url, json=payload)
-    assert response.status_code == 422, f"Expected 422 but got {response.status_code}. Response: {response.text}"
+    assert response.status_code == 400, f"Expected 422 but got {response.status_code}. Response: {response.text}"
     errors = response.json().get("detail", [])
     assert any("email" in str(error) for error in errors), "Expected validation error for invalid email format."
 

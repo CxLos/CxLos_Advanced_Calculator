@@ -118,3 +118,124 @@ def divide(a: Number, b: Number) -> float:
     # Perform division of a by b and return the result as a float
     result = a / b
     return result
+
+def floor(a: Number, b: Number) -> int:
+    """
+    Perform floor division of the first number by the second and return the result.
+
+    Parameters:
+    - a (int or float): The dividend.
+    - b (int or float): The divisor.
+
+    Returns:
+    - int: The result of floor division of a by b.
+
+    Raises:
+    - ValueError: If b is zero, as division by zero is undefined.
+
+    Example:
+    >>> floor(5, 2)
+    2
+    >>> floor(5.5, 2)
+    2
+    >>> floor(5, 0)
+    Traceback (most recent call last):
+        ...
+    ValueError: Cannot divide by zero!
+    """
+    # Check if the divisor is zero to prevent division by zero
+    if b == 0:
+        # Raise a ValueError with a descriptive message
+        raise ValueError("Cannot divide by zero!")
+    
+    # Perform floor division of a by b and return the result as an integer
+    result = a // b
+    return result
+
+def modulus(a: Number, b: Number) -> Number:
+    """
+    Return the modulus of the first number by the second.
+
+    Parameters:
+    - a (int or float): The dividend.
+    - b (int or float): The divisor.
+
+    Returns:
+    - int or float: The remainder of a divided by b.
+
+    Raises:
+    - ValueError: If b is zero, as division by zero is undefined.
+
+    Example:
+    >>> modulus(5, 2)
+    1
+    >>> modulus(5.5, 2)
+    1.5
+    >>> modulus(5, 0)
+    Traceback (most recent call last):
+        ...
+    ValueError: Cannot divide by zero!
+    """
+    # Check if the divisor is zero to prevent division by zero
+    if b == 0:
+        # Raise a ValueError with a descriptive message
+        raise ValueError("Cannot divide by zero!")
+    
+    # Perform modulus operation of a by b and return the result
+    result = a % b
+    return result
+
+def power(a: Number, b: Number) -> Number:
+    """
+    Return the result of raising the first number to the power of the second.
+
+    Parameters:
+    - a (int or float): The base number.
+    - b (int or float): The exponent.
+
+    Returns:
+    - int or float: The result of a raised to the power of b.
+
+    Example:
+    >>> power(2, 3)
+    8
+    >>> power(5, 0)
+    1
+    >>> power(2, -1)
+    0.5
+    """
+    # Perform exponentiation of a by b and return the result
+    result = a ** b
+    return result
+
+def sqrt(a: Number) -> float:
+    """
+    Return the square root of a number.
+
+    Parameters:
+    - a (int or float): The number to find the square root of.
+
+    Returns:
+    - float: The square root of a.
+
+    Raises:
+    - ValueError: If a is negative, as square root of negative numbers is not defined in real numbers.
+
+    Example:
+    >>> square_root(4)
+    2.0
+    >>> square_root(2)
+    1.414213562373095
+    >>> square_root(-1)
+    Traceback (most recent call last):
+        ...
+    ValueError: Cannot take the square root of a negative number!
+    """
+    # Check if the number is negative to prevent invalid square root
+    if a < 0:
+        # Raise a ValueError with a descriptive message
+        raise ValueError("Cannot take the square root of a negative number!")
+    
+    # Perform square root operation and return the result
+    result = a ** 0.5
+    return result

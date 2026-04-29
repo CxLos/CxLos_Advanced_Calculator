@@ -168,7 +168,7 @@ class AbstractCalculation(UUIDMixin, TimestampMixin):
             'multiplication': Multiplication,
             'division': Division,
             'power': Power,
-            'square_root': Sqrt,
+            'sqrt': Sqrt,
             'modulus': Modulus,
             'floor': Floor,
         }

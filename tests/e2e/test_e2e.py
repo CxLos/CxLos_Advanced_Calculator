@@ -17,7 +17,7 @@ def test_hello_world(page, fastapi_server):
     
     # Use an assertion to check that the text within the first <h1> tag is exactly "Hello World".
     # If the text does not match, the test will fail.
-    assert page.inner_text('h1') == 'CxLos Calculator App'
+    assert page.inner_text('h1') == 'Welcome to the CxLos Advanced Calculator App!'
 
 @pytest.mark.skip(reason="Old UI fields #a/#b and Add button no longer exist in current app")
 @pytest.mark.e2e
