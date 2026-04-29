@@ -1,7 +1,19 @@
 
 """
-Main application for the Advanced Calculator API.
-This module sets up the FastAPI application, defines the API routes for performing calculations, and includes error handling for invalid inputs and operations. It also serves the frontend interface and provides a health check endpoint for Docker.
+FastAPI Main Application Module
+
+This module defines the main FastAPI application, including:
+- Application initialization and configuration
+- API endpoints for user authentication
+- API endpoints for calculation management (BREAD operations)
+- Web routes for HTML templates
+- Database table creation on startup
+
+The application follows a RESTful API design with proper separation of concerns:
+- Routes handle HTTP requests and responses
+- Models define database structure
+- Schemas validate request/response data
+- Dependencies handle authentication and database sessions
 """
 
 # =================================
@@ -15,12 +27,14 @@ from uuid import UUID
 from typing import List
 # --------------------------------
 from fastapi import Body, FastAPI, Depends, HTTPException, status, Request, Form
+from fastapi.exceptions import RequestValidationError
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 # --------------------------------
 from sqlalchemy.orm import Session
+from pathlib import Path
 import uvicorn
 # --------------------------------
 from app.auth.dependencies import get_current_active_user
@@ -30,6 +44,31 @@ from app.schemas.calculation import CalculationBase, CalculationRead, Calculatio
 from app.schemas.token import TokenResponse
 from app.schemas.user import UserCreate, UserResponse, UserLogin
 from app.database import Base, get_db, engine
+
+# Import operations for simple calculator endpoints
+try:
+    from app.operations import add, subtract, multiply, divide
+except ImportError:
+    add = subtract = multiply = divide = None
+
+# Pydantic models for simple calculator endpoints
+from pydantic import BaseModel, Field, field_validator
+
+class OperationRequest(BaseModel):
+    a: float = Field(..., description="The first number")
+    b: float = Field(..., description="The second number")
+
+    @field_validator('a', 'b')
+    def validate_numbers(cls, value):
+        if not isinstance(value, (int, float)):
+            raise ValueError('Both a and b must be numbers.')
+        return value
+
+class OperationResponse(BaseModel):
+    result: float = Field(..., description="The result of the operation")
+
+class ErrorResponse(BaseModel):
+    error: str = Field(..., description="Error message")
 
 # ----- Colorama ----- #
 
@@ -68,6 +107,7 @@ async def lifespan(app: FastAPI):
     print(Fore.YELLOW + "Tables created successfully!")
     yield
 
+
 # App
 app = FastAPI(
     title="Calculations API",
@@ -76,36 +116,120 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# Custom Exception Handlers
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    logger.error(f"HTTPException on {request.url.path}: {exc.detail}")
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"error": exc.detail},
+    )
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    error_messages = "; ".join([f"{err['loc'][-1]}: {err['msg']}" for err in exc.errors()])
+    logger.error(f"ValidationError on {request.url.path}: {error_messages}")
+    return JSONResponse(
+        status_code=400,
+        content={"error": error_messages},
+    )
+
 # ------------------------------------------------------------------------------
-# H
+# Static Files and Templates Configuration
 # ------------------------------------------------------------------------------
 
 # Mount the static files directory
 app.mount("/static", StaticFiles(directory="static"), name="static")
+# Optionally mount /assets if directory exists
+assets_dir = Path(__file__).parent.parent / "assets"
+if assets_dir.exists():
+    app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
 
 # Set up Jinja2 templates directory
 templates = Jinja2Templates(directory="templates")
 
+# ------------------------------------------------------------------------------
+# Web (HTML) Routes
+# ------------------------------------------------------------------------------
+# Our web routes use HTML responses with Jinja2 templates
+# These provide a user-friendly web interface alongside the API
+
 # Home page route
 @app.get("/", response_class=HTMLResponse, tags=["web"])
 def read_index(request: Request):
-    return templates.TemplateResponse(request, "index.html")
+    """
+    Landing page.
+    
+    Displays the welcome page with links to register and login.
+    """
+    return templates.TemplateResponse(request=request, name="index.html")
 
-# Login page route
 @app.get("/login", response_class=HTMLResponse, tags=["web"])
 def login_page(request: Request):
-    return templates.TemplateResponse(request, "login.html")
+    """
+    Login page.
+    
+    Displays a form for users to enter credentials and log in.
+    """
+    return templates.TemplateResponse(request=request, name="login.html")
 
-# Registration page route
 @app.get("/register", response_class=HTMLResponse, tags=["web"])
 def register_page(request: Request):
-    return templates.TemplateResponse(request, "register.html")
-
-# Dashboard page Route
+    """
+    Registration page.
+    
+    Displays a form for new users to create an account.
+    """
+    return templates.TemplateResponse(request=request, name="register.html")
 
 @app.get("/dashboard", response_class=HTMLResponse, tags=["web"])
 def dashboard_page(request: Request):
-    return templates.TemplateResponse(request, "dashboard.html")
+    """
+    Dashboard page, listing calculations & new calculation form.
+    
+    This is the main interface after login, where users can:
+    - See all their calculations
+    - Create a new calculation
+    - Access links to view/edit/delete calculations
+    
+    JavaScript in this page calls the API endpoints to fetch and display data.
+    """
+    return templates.TemplateResponse(request=request, name="dashboard.html")
+
+@app.get("/dashboard/view/{calc_id}", response_class=HTMLResponse, tags=["web"])
+def view_calculation_page(request: Request, calc_id: str):
+    """
+    Page for viewing a single calculation (Read).
+    
+    Part of the BREAD (Browse, Read, Edit, Add, Delete) pattern:
+    - This is the Read page
+    
+    Args:
+        request: The FastAPI request object (required by Jinja2)
+        calc_id: UUID of the calculation to view
+        
+    Returns:
+        HTMLResponse: Rendered template with calculation ID passed to frontend
+    """
+    return templates.TemplateResponse(request=request, name="view_calculation.html", context={"calc_id": calc_id})
+
+@app.get("/dashboard/edit/{calc_id}", response_class=HTMLResponse, tags=["web"])
+def edit_calculation_page(request: Request, calc_id: str):
+    """
+    Page for editing a calculation (Update).
+    
+    Part of the BREAD (Browse, Read, Edit, Add, Delete) pattern:
+    - This is the Edit page
+    
+    Args:
+        request: The FastAPI request object (required by Jinja2)
+        calc_id: UUID of the calculation to edit
+        
+    Returns:
+        HTMLResponse: Rendered template with calculation ID passed to frontend
+    """
+    return templates.TemplateResponse(request=request, name="edit_calculation.html", context={"calc_id": calc_id})
 
 # ------------------------------------------------------------------------------
 # Health Endpoint
@@ -191,6 +315,58 @@ def login_form(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = D
         "access_token": auth_result["access_token"],
         "token_type": "bearer"
     }
+
+# ------------------------------------------------------------------------------
+# API Endpoints for Simple Calculator Operations
+# ------------------------------------------------------------------------------
+
+# Simple calculator endpoints
+@app.post("/add", response_model=OperationResponse, responses={400: {"model": ErrorResponse}})
+async def add_route(operation: OperationRequest):
+    if add is None:
+        raise HTTPException(status_code=500, detail="Add operation not implemented.")
+    try:
+        result = add(operation.a, operation.b)
+        return OperationResponse(result=result)
+    except Exception as e:
+        logger.error(f"Add Operation Error: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/subtract", response_model=OperationResponse, responses={400: {"model": ErrorResponse}})
+async def subtract_route(operation: OperationRequest):
+    if subtract is None:
+        raise HTTPException(status_code=500, detail="Subtract operation not implemented.")
+    try:
+        result = subtract(operation.a, operation.b)
+        return OperationResponse(result=result)
+    except Exception as e:
+        logger.error(f"Subtract Operation Error: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/multiply", response_model=OperationResponse, responses={400: {"model": ErrorResponse}})
+async def multiply_route(operation: OperationRequest):
+    if multiply is None:
+        raise HTTPException(status_code=500, detail="Multiply operation not implemented.")
+    try:
+        result = multiply(operation.a, operation.b)
+        return OperationResponse(result=result)
+    except Exception as e:
+        logger.error(f"Multiply Operation Error: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/divide", response_model=OperationResponse, responses={400: {"model": ErrorResponse}})
+async def divide_route(operation: OperationRequest):
+    if divide is None:
+        raise HTTPException(status_code=500, detail="Divide operation not implemented.")
+    try:
+        result = divide(operation.a, operation.b)
+        return OperationResponse(result=result)
+    except ValueError as e:
+        logger.error(f"Divide Operation Error: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Divide Operation Internal Error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 # ------------------------------------------------------------------------------
 # Calculations Endpoints (BREAD)
