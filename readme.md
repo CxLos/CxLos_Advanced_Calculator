@@ -385,5 +385,14 @@ On the client, I enforced basic checks like email format validation and a minimu
 
 The hardest parts were getting JWT generation/verification correct, making sure the front end stored the token at the right moment, and running Playwright reliably in the Docker environment. I worked through these by logging decoded token claims during development.
 
+## End of Course Reflection
+
+I think the main skill that I will be taking with me from this course is how to build and construct a professional application from top to bottom. A lot of projects I have worked on in the past, whether portfolio projects or work projects, were very simple. I was building full stack web applications way back when I took a coding bootcamp, but when I pivoted towards data science, a lot of the online learning I did was very choppy and really just learning a bunch of useful individual concepts, but nothing that really involved integrating all of that together into one fully-fledged professional application. What I built was pretty simple, one-file dashboards. I did not know what testing was or how to get a clean folder structure going. This definitely shaped my overall understanding of the subject matter because now I will be designing future projects with all these professional tips.
+
+There were plenty of challenges that I faced along the way in this course. The way I overcame them was by intentionally watching each of the lecture videos and pausing where needed. If there were concepts that weren’t making a lot of sense, I made sure to slow down, pause the videos, and work through them to make sure I kept up with the pace of the videos because I like to actively work on the application the same time the professor is. Documentation has also been super helpful when I needed to do a deeper dive on a particular concept.
+
+Interacting with peers and the professor has been helpful in enriching my learning experience by providing diverse perspectives to certain topics. Sometimes you gain a little bit of wisdom by reading other people’s discussion responses because everybody has a different background with a different set of experiences than you.
+
+I think for me, the aspects of the course structure that were most effective for my learning were the videos. The professor did a good job of walking through the code showing us what each file is responsible for, with detailed pseudo-code and commentary further explaining individual aspects like functions etc.
 
 ---
