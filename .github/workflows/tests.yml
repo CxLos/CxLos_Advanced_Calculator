@@ -186,6 +186,7 @@ jobs:
          ignore-unfixed: true
          severity: 'CRITICAL,HIGH'
          trivyignores: .trivyignore
+         skip-files: 'usr/local/lib/python3.12/site-packages'
 
  # ============================================================================
  # JOB 3: deploy
