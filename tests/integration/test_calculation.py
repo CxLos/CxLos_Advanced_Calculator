@@ -327,7 +327,7 @@ def test_factory_creates_power():
 
 def test_factory_creates_sqrt():
     """Test that Calculation.create returns a Sqrt instance."""
-    calc = Calculation.create("square_root", user_id, [16])
+    calc = Calculation.create("sqrt", user_id, [16])
     assert isinstance(calc, Sqrt)
     assert calc.get_result() == 4
 

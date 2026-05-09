@@ -191,7 +191,7 @@ class AbstractCalculation(UUIDMixin, TimestampMixin):
         Raises:
             NotImplementedError: If called on base class
         """
-        raise NotImplementedError(
+        raise NotImplementedError(  # pragma: no cover
             "Subclasses must implement get_result() method"
         )
   

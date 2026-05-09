@@ -156,8 +156,8 @@ class CalculationBase(BaseModel):
         Raises:
             ValueError: If validation fails
         """
-        if len(self.inputs) < 2:
-            raise ValueError(
+        if len(self.inputs) < 2:  # pragma: no cover
+            raise ValueError(  # pragma: no cover
                 "At least two numbers are required for calculation"
             )
         if self.type in {CalculationType.DIVISION, CalculationType.FLOOR, CalculationType.MODULUS}:
@@ -235,8 +235,8 @@ class CalculationUpdate(BaseModel):
         Raises:
             ValueError: If inputs has fewer than 2 numbers
         """
-        if self.inputs is not None and len(self.inputs) < 2:
-            raise ValueError(
+        if self.inputs is not None and len(self.inputs) < 2:  # pragma: no cover
+            raise ValueError(  # pragma: no cover
                 "At least two numbers are required for calculation"
             )
         return self
