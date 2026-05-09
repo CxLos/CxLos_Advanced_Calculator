@@ -2,7 +2,7 @@
 
 import pytest  # Import the pytest framework for writing and running tests
 from typing import Union  # what union does is it allows us to specify that a variable can be of multiple types, in this case, either int or float
-from app.operations import add, subtract, multiply, divide  # Import the calculator functions from the operations module
+from app.operations import add, subtract, multiply, divide, floor, modulus, power, sqrt  # Import the calculator functions from the operations module
 
 # Define a type alias for numbers that can be either int or float
 Number = Union[int, float]
@@ -14,11 +14,11 @@ Number = Union[int, float]
 @pytest.mark.parametrize(
     "a, b, expected",
     [
-        (2, 3, 5),           # Test adding two positive integers
-        (-2, -3, -5),        # Test adding two negative integers
-        (2.5, 3.5, 6.0),     # Test adding two positive floats
-        (-2.5, 3.5, 1.0),    # Test adding a negative float and a positive float
-        (0, 0, 0),            # Test adding zeros
+        (2, 3, 5),        
+        (-2, -3, -5),    
+        (2.5, 3.5, 6.0),    
+        (-2.5, 3.5, 1.0),   
+        (0, 0, 0),           
     ],
     ids=[
         "add_two_positive_integers",
@@ -49,10 +49,8 @@ def test_add(a: Number, b: Number, expected: Number) -> None:
     >>> test_add(2, 3, 5)
     >>> test_add(-2, -3, -5)
     """
-    # Call the 'add' function with the provided arguments
+
     result = add(a, b)
-    
-    # Assert that the result of add(a, b) matches the expected value
     assert result == expected, f"Expected add({a}, {b}) to be {expected}, but got {result}"
 
 
@@ -63,11 +61,11 @@ def test_add(a: Number, b: Number, expected: Number) -> None:
 @pytest.mark.parametrize(
     "a, b, expected",
     [
-        (5, 3, 2),           # Test subtracting a smaller positive integer from a larger one
-        (-5, -3, -2),        # Test subtracting a negative integer from another negative integer
-        (5.5, 2.5, 3.0),     # Test subtracting two positive floats
-        (-5.5, -2.5, -3.0),  # Test subtracting two negative floats
-        (0, 0, 0),            # Test subtracting zeros
+        (5, 3, 2),          
+        (-5, -3, -2),        
+        (5.5, 2.5, 3.0),     
+        (-5.5, -2.5, -3.0),  
+        (0, 0, 0),           
     ],
     ids=[
         "subtract_two_positive_integers",
@@ -98,10 +96,8 @@ def test_subtract(a: Number, b: Number, expected: Number) -> None:
     >>> test_subtract(5, 3, 2)
     >>> test_subtract(-5, -3, -2)
     """
-    # Call the 'subtract' function with the provided arguments
+
     result = subtract(a, b)
-    
-    # Assert that the result of subtract(a, b) matches the expected value
     assert result == expected, f"Expected subtract({a}, {b}) to be {expected}, but got {result}"
 
 
@@ -112,11 +108,11 @@ def test_subtract(a: Number, b: Number, expected: Number) -> None:
 @pytest.mark.parametrize(
     "a, b, expected",
     [
-        (2, 3, 6),           # Test multiplying two positive integers
-        (-2, 3, -6),         # Test multiplying a negative integer with a positive integer
-        (2.5, 4.0, 10.0),    # Test multiplying two positive floats
-        (-2.5, 4.0, -10.0),  # Test multiplying a negative float with a positive float
-        (0, 5, 0),            # Test multiplying zero with a positive integer
+        (2, 3, 6),          
+        (-2, 3, -6),         
+        (2.5, 4.0, 10.0),  
+        (-2.5, 4.0, -10.0),  
+        (0, 5, 0),            
     ],
     ids=[
         "multiply_two_positive_integers",
@@ -147,10 +143,8 @@ def test_multiply(a: Number, b: Number, expected: Number) -> None:
     >>> test_multiply(2, 3, 6)
     >>> test_multiply(-2, 3, -6)
     """
-    # Call the 'multiply' function with the provided arguments
+
     result = multiply(a, b)
-    
-    # Assert that the result of multiply(a, b) matches the expected value
     assert result == expected, f"Expected multiply({a}, {b}) to be {expected}, but got {result}"
 
 
@@ -161,11 +155,11 @@ def test_multiply(a: Number, b: Number, expected: Number) -> None:
 @pytest.mark.parametrize(
     "a, b, expected",
     [
-        (6, 3, 2.0),           # Test dividing two positive integers
-        (-6, 3, -2.0),         # Test dividing a negative integer by a positive integer
-        (6.0, 3.0, 2.0),       # Test dividing two positive floats
-        (-6.0, 3.0, -2.0),     # Test dividing a negative float by a positive float
-        (0, 5, 0.0),            # Test dividing zero by a positive integer
+        (6, 3, 2.0),           
+        (-6, 3, -2.0),         
+        (6.0, 3.0, 2.0),      
+        (-6.0, 3.0, -2.0),    
+        (0, 5, 0.0),          
     ],
     ids=[
         "divide_two_positive_integers",
@@ -196,10 +190,8 @@ def test_divide(a: Number, b: Number, expected: float) -> None:
     >>> test_divide(6, 3, 2.0)
     >>> test_divide(-6, 3, -2.0)
     """
-    # Call the 'divide' function with the provided arguments
+
     result = divide(a, b)
-    
-    # Assert that the result of divide(a, b) matches the expected value
     assert result == expected, f"Expected divide({a}, {b}) to be {expected}, but got {result}"
 
 
@@ -223,11 +215,275 @@ def test_divide_by_zero() -> None:
     Example:
     >>> test_divide_by_zero()
     """
-    # Use pytest's context manager to check for a ValueError when dividing by zero
+
     with pytest.raises(ValueError) as excinfo:
-        # Attempt to divide 6 by 0, which should raise a ValueError
         divide(6, 0)
     
-    # Assert that the exception message contains the expected error message
     assert "Cannot divide by zero!" in str(excinfo.value), \
         f"Expected error message 'Cannot divide by zero!', but got '{excinfo.value}'"
+
+
+# ---------------------------------------------
+# Unit Tests for the 'floor' Function
+# ---------------------------------------------
+
+@pytest.mark.parametrize(
+    "a, b, expected",
+    [
+        (7, 2, 3),         
+        (-7, 2, -4),         
+        (7.5, 2, 3),        
+        (-7.5, 2, -4),       
+        (0, 5, 0),           
+    ],
+    ids=[
+        "floor_two_positive_integers",
+        "floor_negative_integer_by_positive_integer",
+        "floor_positive_float_by_positive_integer",
+        "floor_negative_float_by_positive_integer",
+        "floor_zero_by_positive_integer",
+    ]
+)
+def test_floor(a: Number, b: Number, expected: int) -> None:
+    """
+    Test the 'floor' function with various combinations of integers and floats.
+
+    This parameterized test verifies that the 'floor' function correctly performs floor
+    division of the first number by the second, handling both positive and negative values,
+    as well as integers and floats.
+
+    Parameters:
+    - a (Number): The dividend.
+    - b (Number): The divisor.
+    - expected (int): The expected result of the floor division.
+
+    Steps:
+    1. Call the 'floor' function with arguments 'a' and 'b'.
+    2. Assert that the result is equal to 'expected'.
+
+    Example:
+    >>> test_floor(7, 2, 3)
+    >>> test_floor(-7, 2, -4)
+    """
+
+    result = floor(a, b)
+    assert result == expected, f"Expected floor({a}, {b}) to be {expected}, but got {result}"
+
+
+# ---------------------------------------------
+# Negative Test Case: Floor Division by Zero
+# ---------------------------------------------
+
+def test_floor_by_zero() -> None:
+    """
+    Test the 'floor' function with division by zero.
+
+    This negative test case verifies that attempting to floor divide by zero raises a
+    ValueError with the appropriate error message.
+
+    Steps:
+    1. Attempt to call the 'floor' function with arguments 7 and 0, which should raise a ValueError.
+    2. Use pytest's 'raises' context manager to catch the expected exception.
+    3. Assert that the error message contains "Cannot divide by zero!".
+
+    Example:
+    >>> test_floor_by_zero()
+    """
+
+    with pytest.raises(ValueError) as excinfo:
+        floor(7, 0)
+
+    assert "Cannot divide by zero!" in str(excinfo.value), \
+        f"Expected error message 'Cannot divide by zero!', but got '{excinfo.value}'"
+
+
+# ---------------------------------------------
+# Unit Tests for the 'modulus' Function
+# ---------------------------------------------
+
+@pytest.mark.parametrize(
+    "a, b, expected",
+    [
+        (10, 3, 1),        
+        (-10, 3, 2),     
+        (10.5, 3, 1.5),      
+        (0, 5, 0),         
+        (7, 7, 0),           
+    ],
+    ids=[
+        "modulus_two_positive_integers",
+        "modulus_negative_integer_by_positive_integer",
+        "modulus_positive_float_by_positive_integer",
+        "modulus_zero_by_positive_integer",
+        "modulus_equal_numbers",
+    ]
+)
+def test_modulus(a: Number, b: Number, expected: Number) -> None:
+    """
+    Test the 'modulus' function with various combinations of integers and floats.
+
+    This parameterized test verifies that the 'modulus' function correctly returns the
+    remainder of dividing the first number by the second, handling both positive and
+    negative values, as well as integers and floats.
+
+    Parameters:
+    - a (Number): The dividend.
+    - b (Number): The divisor.
+    - expected (Number): The expected remainder.
+
+    Steps:
+    1. Call the 'modulus' function with arguments 'a' and 'b'.
+    2. Assert that the result is equal to 'expected'.
+
+    Example:
+    >>> test_modulus(10, 3, 1)
+    >>> test_modulus(-10, 3, 2)
+    """
+
+    result = modulus(a, b)
+    assert result == expected, f"Expected modulus({a}, {b}) to be {expected}, but got {result}"
+
+
+# ---------------------------------------------
+# Negative Test Case: Modulus by Zero
+# ---------------------------------------------
+
+def test_modulus_by_zero() -> None:
+    """
+    Test the 'modulus' function with division by zero.
+
+    This negative test case verifies that attempting to compute the modulus with a divisor
+    of zero raises a ValueError with the appropriate error message.
+
+    Steps:
+    1. Attempt to call the 'modulus' function with arguments 10 and 0, which should raise a ValueError.
+    2. Use pytest's 'raises' context manager to catch the expected exception.
+    3. Assert that the error message contains "Cannot divide by zero!".
+
+    Example:
+    >>> test_modulus_by_zero()
+    """
+
+    with pytest.raises(ValueError) as excinfo:
+        modulus(10, 0)
+
+    assert "Cannot divide by zero!" in str(excinfo.value), \
+        f"Expected error message 'Cannot divide by zero!', but got '{excinfo.value}'"
+
+
+# ---------------------------------------------
+# Unit Tests for the 'power' Function
+# ---------------------------------------------
+
+@pytest.mark.parametrize(
+    "a, b, expected",
+    [
+        (2, 3, 8),           
+        (-2, 3, -8),       
+        (2, 0, 1),           
+        (2, -1, 0.5),       
+        (2.5, 2, 6.25),     
+    ],
+    ids=[
+        "power_positive_base_positive_exponent",
+        "power_negative_base_positive_odd_exponent",
+        "power_any_base_zero_exponent",
+        "power_positive_base_negative_exponent",
+        "power_positive_float_base_positive_exponent",
+    ]
+)
+def test_power(a: Number, b: Number, expected: Number) -> None:
+    """
+    Test the 'power' function with various combinations of bases and exponents.
+
+    This parameterized test verifies that the 'power' function correctly raises the first
+    number to the power of the second, handling positive, negative, and zero exponents,
+    as well as integer and float bases.
+
+    Parameters:
+    - a (Number): The base number.
+    - b (Number): The exponent.
+    - expected (Number): The expected result of the exponentiation.
+
+    Steps:
+    1. Call the 'power' function with arguments 'a' and 'b'.
+    2. Assert that the result is equal to 'expected'.
+
+    Example:
+    >>> test_power(2, 3, 8)
+    >>> test_power(2, 0, 1)
+    """
+
+    result = power(a, b)
+    assert result == expected, f"Expected power({a}, {b}) to be {expected}, but got {result}"
+
+
+# ---------------------------------------------
+# Unit Tests for the 'sqrt' Function
+# ---------------------------------------------
+
+@pytest.mark.parametrize(
+    "a, expected",
+    [
+        (4, 2.0),            
+        (9, 3.0),            
+        (2, 2 ** 0.5),       
+        (0, 0.0),            
+        (2.25, 1.5),         
+    ],
+    ids=[
+        "sqrt_perfect_square_four",
+        "sqrt_perfect_square_nine",
+        "sqrt_non_perfect_square",
+        "sqrt_zero",
+        "sqrt_perfect_square_float",
+    ]
+)
+def test_sqrt(a: Number, expected: float) -> None:
+    """
+    Test the 'sqrt' function with various non-negative numbers.
+
+    This parameterized test verifies that the 'sqrt' function correctly returns the square
+    root of a non-negative number, handling both perfect squares and non-perfect squares,
+    as well as integers and floats.
+
+    Parameters:
+    - a (Number): The number to find the square root of.
+    - expected (float): The expected square root result.
+
+    Steps:
+    1. Call the 'sqrt' function with argument 'a'.
+    2. Assert that the result is equal to 'expected'.
+
+    Example:
+    >>> test_sqrt(4, 2.0)
+    >>> test_sqrt(0, 0.0)
+    """
+    result = sqrt(a)
+    assert result == expected, f"Expected sqrt({a}) to be {expected}, but got {result}"
+
+
+# ---------------------------------------------
+# Negative Test Case: Square Root of Negative Number
+# ---------------------------------------------
+
+def test_sqrt_negative_number() -> None:
+    """
+    Test the 'sqrt' function with a negative number.
+
+    This negative test case verifies that attempting to compute the square root of a
+    negative number raises a ValueError with the appropriate error message.
+
+    Steps:
+    1. Attempt to call the 'sqrt' function with argument -1, which should raise a ValueError.
+    2. Use pytest's 'raises' context manager to catch the expected exception.
+    3. Assert that the error message contains "Cannot take the square root of a negative number!".
+
+    Example:
+    >>> test_sqrt_negative_number()
+    """
+    with pytest.raises(ValueError) as excinfo:
+        sqrt(-1)
+
+    assert "Cannot take the square root of a negative number!" in str(excinfo.value), \
+        f"Expected error message 'Cannot take the square root of a negative number!', but got '{excinfo.value}'"
